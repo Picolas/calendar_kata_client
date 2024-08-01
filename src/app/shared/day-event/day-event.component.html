@@ -1,0 +1,18 @@
+<div [class.last-previous-day-event]="day?.date | isEventLastPreviousDay: event?.startDate"
+	 [class.last-next-day-event]="day?.date | isEventLastNextDay: event?.endDate"
+	 class="day-event rounded relative" (click)="onClickEvent($event)"
+	 [class.many-events]="day && day.events && day.events.length > maxEventUntilReduce">
+	<div class="header">
+		<span class="text-xs px-1 py-0.5 bg-indigo-100 rounded-md mr-1.5">
+			{{ event?.startDate | date: 'HH:mm' }}
+			<span *ngIf="event?.startDate | isEndDateEqualStartDate: event?.endDate">-
+				{{ event?.endDate | date: 'HH:mm' }}
+				</span>
+			</span>
+		<span class="event-title text-xs mb-0.5 font-bold">{{ event?.title }}
+		</span>
+	</div>
+	<div class="event-description line-clamp-2 text-xs"
+		 *ngIf="showDescription && day && day.events && day.events.length <= maxEventUntilReduce">{{ event?.description }}
+	</div>
+</div>
