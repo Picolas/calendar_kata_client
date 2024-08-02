@@ -1,8 +1,6 @@
 .day {
 	padding: 10px 0;
 	background: #f8fafc;
-	border-right: 5px solid #fff;
-	border-bottom: 5px solid #fff;
 	width: 100%;
 	cursor: pointer;
 	height: 250px;

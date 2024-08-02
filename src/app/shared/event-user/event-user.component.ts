@@ -1,13 +1,11 @@
 import {Component, Input} from '@angular/core';
 import {PartialUser} from "../../interfaces/User";
-import {NgIf} from "@angular/common";
+
 
 @Component({
 	selector: 'app-event-user',
 	standalone: true,
-	imports: [
-		NgIf
-	],
+	imports: [],
 	templateUrl: './event-user.component.html',
 	styleUrl: './event-user.component.css'
 })

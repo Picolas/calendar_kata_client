@@ -1,59 +1,59 @@
-<div *ngIf="event" class="my-1 rounded relative p-5 border-slate-300 border-solid border-s-2 bg-slate-100">
-	<form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
-		<div class="title flex flex-col">
-			<label for="title">Titre</label>
-			<input type="text" id="title" formControlName="title"
-				   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-				   required/>
-		</div>
-		<div class="description flex flex-col">
-			<label for="description">Description</label>
-			<textarea type="text" id="description" formControlName="description"
-					  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					  required></textarea>
-		</div>
-
-		<div class="event-dates flex flex-row gap-2">
-			<div class="start-date flex flex-col">
-				<label for="startDate">Date de début</label>
-				<input
-					class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					type="datetime-local" id="startDate" formControlName="startDate" required>
-			</div>
-			<div class="end-date flex flex-col">
-				<label for="endDate">Date de fin</label>
-				<input
-					class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					type="datetime-local" id="endDate" formControlName="endDate" required>
-			</div>
-		</div>
-
-		<!--
-		<div class="participants flex flex-col gap-2 mb-2">
-			<label for="participants">Participants</label>
-			<div formArrayName="inUser">
-				<div *ngFor="let user of inUser.controls; let i = index" class="flex flex-row gap-1 mb-0.5">
-					<input
-						class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-						[formControlName]="i" placeholder="Email du participant">
-					<button
-						class="text-slate-950"
-						type="button" (click)="removeParticipant(i)">X
-					</button>
-				</div>
-			</div>
-			<div class="add-participant">
-				<button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
-						type="button" (click)="addParticipant()">Ajouter
-				</button>
-			</div>
-		</div>
-		-->
-		<hr>
-		<div class="save">
-			<button class="text-slate-50 py-0.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-md"
-					type="submit">Enregistrer
-			</button>
-		</div>
-	</form>
-</div>
+@if (event) {
+  <div class="my-1 rounded relative p-5 border-slate-300 border-solid border-s-2 bg-slate-100">
+    <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
+      <div class="title flex flex-col">
+        <label for="title">Titre</label>
+        <input type="text" id="title" formControlName="title"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+          required/>
+      </div>
+      <div class="description flex flex-col">
+        <label for="description">Description</label>
+        <textarea type="text" id="description" formControlName="description"
+          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+        required></textarea>
+      </div>
+      <div class="event-dates flex flex-row gap-2">
+        <div class="start-date flex flex-col">
+          <label for="startDate">Date de début</label>
+          <input
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            type="datetime-local" id="startDate" formControlName="startDate" required>
+        </div>
+        <div class="end-date flex flex-col">
+          <label for="endDate">Date de fin</label>
+          <input
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+            type="datetime-local" id="endDate" formControlName="endDate" required>
+        </div>
+      </div>
+      <!--
+      <div class="participants flex flex-col gap-2 mb-2">
+        <label for="participants">Participants</label>
+        <div formArrayName="inUser">
+          <div *ngFor="let user of inUser.controls; let i = index" class="flex flex-row gap-1 mb-0.5">
+            <input
+              class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+              [formControlName]="i" placeholder="Email du participant">
+            <button
+              class="text-slate-950"
+              type="button" (click)="removeParticipant(i)">X
+            </button>
+          </div>
+        </div>
+        <div class="add-participant">
+          <button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
+            type="button" (click)="addParticipant()">Ajouter
+          </button>
+        </div>
+      </div>
+      -->
+      <hr>
+        <div class="save">
+          <button class="text-slate-50 py-0.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-md"
+            type="submit">Enregistrer
+          </button>
+        </div>
+      </form>
+    </div>
+  }

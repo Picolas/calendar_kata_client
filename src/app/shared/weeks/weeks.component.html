@@ -1,23 +1,7 @@
 <div class="calendar-day-labels mb-1">
-	<div class="calendar-day monday">
-		<p>Lundi</p>
-	</div>
-	<div class="calendar-day tuesday">
-		<p>Mardi</p>
-	</div>
-	<div class="calendar-day wednesday">
-		<p>Mercredi</p>
-	</div>
-	<div class="calendar-day thursday">
-		<p>Jeudi</p>
-	</div>
-	<div class="calendar-day friday">
-		<p>Vendredi</p>
-	</div>
-	<div class="calendar-day saturday">
-		<p>Samedi</p>
-	</div>
-	<div class="calendar-day sunday">
-		<p>Dimanche</p>
-	</div>
+	@for (day of weeks; track day) {
+		<div class="calendar-day">
+			<p>{{ day }}</p>
+		</div>
+	}
 </div>

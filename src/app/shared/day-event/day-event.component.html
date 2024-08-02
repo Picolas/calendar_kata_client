@@ -1,17 +1,39 @@
-<div class="day-event rounded relative" (click)="onClickEvent($event)"
-	 [class.many-events]="day && day.events && day.events.length > maxEventUntilReduce">
-	<div class="header">
-		<span *ngIf="!(event?.startDate | isMultipleDay: event?.endDate)"
-			  class="text-xs text-center px-1 py-0.5 bg-indigo-100 rounded-md mr-1.5">
-			{{ event?.startDate | date: 'HH:mm':'UTC' }}
-			<span *ngIf="event?.startDate | isEndDateEqualStartDate: event?.endDate">-
-				{{ event?.endDate | date: 'HH:mm':'UTC' }}
-				</span>
-			</span>
-		<span class="event-title text-xs mb-0.5 font-bold">{{ event?.title }}
-		</span>
-	</div>
-	<div class="event-description line-clamp-2 text-xs"
-		 *ngIf="showDescription && day && day.events && day.events.length <= maxEventUntilReduce">{{ event?.description }}
-	</div>
+<div class="day-event rounded text-xxs" (click)="onClickEvent($event)">
+	@if (!(event?.startDate | isMultipleDay: event?.endDate)) {
+		<span
+			class="text-xxs text-center px-0.5 py-0.5 bg-indigo-100 rounded-md ml-0.5 mr-1">
+        {{ event?.startDate | date: 'HH:mm':'UTC' }}</span>
+	}
+	{{ event?.title }}
+
+	@if (showDescription && day && day.events && day.events.length <= maxEventUntilReduce) {
+		<div class="event-description line-clamp-2 text-xs"
+		>{{ event?.description }}
+		</div>
+	}
 </div>
+<!--
+	<div class="header">
+		@if (!(event?.startDate | isMultipleDay: event?.endDate)) {
+			<span
+				class="text-xxs text-center px-0.5 py-0.5 bg-indigo-100 rounded-md ml-0.5 mr-1">
+        {{ event?.startDate | date: 'HH:mm':'UTC' }}
+
+				@if (event?.startDate | isEndDateEqualStartDate: event?.endDate) {
+					<span>-
+						{{ event?.endDate | date: 'HH:mm':'UTC' }}
+          </span>
+				}
+
+      </span>
+		}
+		<span class="event-title text-xxs mb-0.5 font-bold">{{ event?.title }}
+    </span>
+	</div>
+	@if (showDescription && day && day.events && day.events.length <= maxEventUntilReduce) {
+		<div class="event-description line-clamp-2 text-xs"
+		>{{ event?.description }}
+		</div>
+	}
+</div>
+-->
