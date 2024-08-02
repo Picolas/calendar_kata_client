@@ -4,6 +4,9 @@
 			Calendar App
 		</h1>
 	</div>
+	<div class="mb-5">
+		<app-event></app-event>
+	</div>
 	<div class="rounded border-slate-100 border-4 border-solid">
 		<app-calendar (monthChange)="onMonthChange($event)" [days]="days" [month]="month"></app-calendar>
 	</div>

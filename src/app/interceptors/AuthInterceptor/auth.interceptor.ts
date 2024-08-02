@@ -19,7 +19,7 @@ export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
 
 	return next(cloned).pipe(
 		catchError(error => {
-			if (error.status === 401) {
+			if (error.status === 401 && authToken) {
 				return authService.refreshToken().pipe(
 					switchMap(() => {
 						const newToken = authService.getToken();
@@ -29,6 +29,10 @@ export function authInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn) 
 							}
 						});
 						return next(cloned);
+					}),
+					catchError(() => {
+						authService.logout();
+						return throwError(error);
 					})
 				);
 			}

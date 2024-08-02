@@ -11,6 +11,7 @@ import {API_URL} from '../../constants/constants';
 export class AuthService {
 	private apiUrl = `${API_URL}/auth`;
 	private tokenKey = 'authToken';
+	userId: number | null = null;
 
 	constructor(private http: HttpClient, private cookieService: CookieService) {
 	}
@@ -25,6 +26,9 @@ export class AuthService {
 						sameSite: 'Strict',
 						expires: new Date(new Date().getTime() + 3600 * 1000)
 					});
+				}
+				if (response.token.user.id) {
+					this.userId = response.token.user.id;
 				}
 			}),
 			catchError(error => {
@@ -67,14 +71,17 @@ export class AuthService {
 
 	refreshToken(): Observable<any> {
 		return this.http.post<any>(`${this.apiUrl}/refresh-token`, {}).pipe(
-			tap(response => {
-				if (response.token.token) {
-					this.cookieService.set(this.tokenKey, response.token.token, {
+			tap((response) => {
+				if (response.token) {
+					this.cookieService.set(this.tokenKey, response.token, {
 						path: '/',
 						secure: true,
 						sameSite: 'Strict',
 						expires: new Date(new Date().getTime() + 3600 * 1000)
 					});
+				}
+				if (response.token.userId) {
+					this.userId = response.token.userId;
 				}
 			}),
 			catchError(error => {
@@ -82,5 +89,14 @@ export class AuthService {
 				return of({error: 'Refresh token failed. Please log in again.'});
 			})
 		);
+	}
+
+	getUserId(): number | null {
+		if (this.userId === null) {
+			this.refreshToken().subscribe(() => {
+				return this.userId;
+			});
+		}
+		return this.userId;
 	}
 }
