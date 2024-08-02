@@ -1,5 +1,5 @@
 import {Component, Input} from '@angular/core';
-import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import { DatePipe } from "@angular/common";
 import {DayEventComponent} from "../day-event/day-event.component";
 import {PartialDay} from "../../interfaces/Day";
 import {IsDayTodayPipe} from "../../pipes/IsDayToday/is-day-today.pipe";
@@ -10,17 +10,15 @@ import {IsFirstOrLastDayMonthPipe} from "../../pipes/IsDayFirstOrLastDayMonth/is
 	selector: 'app-day',
 	standalone: true,
 	imports: [
-		DayEventComponent,
-		DatePipe,
-		NgIf,
-		IsPastDayPipe,
-		IsDayTodayPipe,
-		IsFirstOrLastDayMonthPipe,
-		IsDayTodayPipe,
-		IsPastDayPipe,
-		IsFirstOrLastDayMonthPipe,
-		NgForOf
-	],
+    DayEventComponent,
+    DatePipe,
+    IsPastDayPipe,
+    IsDayTodayPipe,
+    IsFirstOrLastDayMonthPipe,
+    IsDayTodayPipe,
+    IsPastDayPipe,
+    IsFirstOrLastDayMonthPipe
+],
 	templateUrl: './day.component.html',
 	styleUrl: './day.component.css'
 })

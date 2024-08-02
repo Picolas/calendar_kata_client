@@ -2,7 +2,7 @@ import {Component, Input, OnInit} from '@angular/core';
 import {PartialEvent} from "../../interfaces/Event";
 import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {EventService} from "../../services/EventService/event.service";
-import {NgForOf, NgIf} from "@angular/common";
+
 import {EventPopupService} from "../../services/EventPopupService/event-popup.service";
 import {catchError} from "rxjs/operators";
 import {EMPTY} from "rxjs";
@@ -12,10 +12,8 @@ import {RefreshDaysService} from "../../services/RefreshDaysService/refresh-days
 	selector: 'app-edit-event',
 	standalone: true,
 	imports: [
-		ReactiveFormsModule,
-		NgForOf,
-		NgIf
-	],
+    ReactiveFormsModule
+],
 	templateUrl: './edit-event.component.html',
 	styleUrl: './edit-event.component.css'
 })

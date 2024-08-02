@@ -2,15 +2,11 @@
 	display: grid;
 	grid-template-columns: repeat(7, 1fr);
 	grid-auto-rows: 1fr;
-	grid-gap: 0;
+	column-gap: 5px;
+	row-gap: 5px;
 
 	.calendar-day {
 		padding: 10px;
-		border-right: 5px solid #f1f5f9;
-		border-bottom: 5px solid #f1f5f9;
-	}
-
-	.calendar-day:last-child {
-		border-right: none;
+		background-color: #f1f5f9;
 	}
 }

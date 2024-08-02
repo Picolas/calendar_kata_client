@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {PartialEvent} from "../../interfaces/Event";
 import {PartialDay} from "../../interfaces/Day";
 import {IsEndDateEqualStartDatePipe} from "../../pipes/IsEndDateEqualStartDate/is-end-date-equal-start-date.pipe";
-import {DatePipe, NgForOf, NgIf} from "@angular/common";
+import { DatePipe } from "@angular/common";
 import {EventPopupService} from "../../services/EventPopupService/event-popup.service";
 import {EventService} from "../../services/EventService/event.service";
 import {catchError} from "rxjs/operators";
@@ -16,14 +16,12 @@ import {RefreshDaysService} from "../../services/RefreshDaysService/refresh-days
 	selector: 'app-event',
 	standalone: true,
 	imports: [
-		IsEndDateEqualStartDatePipe,
-		DatePipe,
-		NgIf,
-		NgForOf,
-		EventUserComponent,
-		EditEventComponent,
-		IsMultipleDayPipe
-	],
+    IsEndDateEqualStartDatePipe,
+    DatePipe,
+    EventUserComponent,
+    EditEventComponent,
+    IsMultipleDayPipe
+],
 	templateUrl: './event.component.html',
 	styleUrl: './event.component.css'
 })

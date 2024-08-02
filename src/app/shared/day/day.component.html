@@ -2,14 +2,18 @@
 	 [class.past-day]="day?.date | isPastDay"
 	 (click)="onClickDay($event)">
 	<div class="day-header">
-		<div *ngIf="day?.date | isFirstOrLastDayMonth" class="day-month">
-			{{ day?.date | date: 'MMMM' }}
-		</div>
+		@if (day?.date | isFirstOrLastDayMonth) {
+			<div class="day-month">
+				{{ day?.date | date: 'MMMM' }}
+			</div>
+		}
 		<div class="day-number">
 			<p>{{ day?.date | date: 'd' }}</p>
 		</div>
 	</div>
 	<div class="day-events">
-		<app-day-event *ngFor="let event of day?.events" [event]="event" [day]="day"></app-day-event>
+		@for (event of day?.events; track event) {
+			<app-day-event [event]="event" [day]="day"></app-day-event>
+		}
 	</div>
 </div>

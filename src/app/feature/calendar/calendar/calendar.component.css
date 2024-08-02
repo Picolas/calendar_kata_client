@@ -1,4 +1,4 @@
-.calendar {
+:host {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -16,6 +16,8 @@
 	grid-template-columns: repeat(7, 1fr);
 	grid-auto-rows: 1fr;
 	grid-gap: 0;
+	column-gap: 5px;
+	row-gap: 5px;
 	position: relative;
 }
 
@@ -28,5 +30,5 @@
 }
 
 .calendar-header {
-	border-bottom: 5px solid #f1f5f9;
+	border-bottom: 5px solid #e2e8f0;
 }
