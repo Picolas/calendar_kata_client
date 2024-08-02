@@ -1,0 +1,19 @@
+<div class="day" [class.last-day]="day?.isLastDay" [class.today]="day?.date | isDayToday"
+	 [class.past-day]="day?.date | isPastDay"
+	 (click)="onClickDay($event)">
+	<div class="day-header">
+		@if (day?.date | isFirstOrLastDayMonth) {
+			<div class="day-month">
+				{{ day?.date | date: 'MMMM' }}
+			</div>
+		}
+		<div class="day-number">
+			<p>{{ day?.date | date: 'd' }}</p>
+		</div>
+	</div>
+	<div class="day-events">
+		@for (event of day?.events; track event.id && event.title) {
+			<app-day-event [event]="event" [day]="day"></app-day-event>
+		}
+	</div>
+</div>
