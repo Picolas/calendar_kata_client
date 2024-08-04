@@ -4,12 +4,11 @@ import {PartialNotification} from "../interfaces/Notification";
 export class NotificationsService {
     private prisma = new PrismaClient();
 
-    public async createNotification(userId: number, content: string): Promise<void> {
-        await this.prisma.notification.create({
+    public async createNotification(userId: number, content: string): Promise<PartialNotification> {
+        return this.prisma.notification.create({
             data: {
                 content,
                 userId,
-                createdAt: new Date(),
             },
         });
     }
@@ -36,6 +35,26 @@ export class NotificationsService {
             where: { id: notificationId },
             data: { read: true },
         });
+    }
+
+    public async getNotificationById(notificationId: number): Promise<PartialNotification> {
+        const notification = await this.prisma.notification.findUnique({
+            where: { id: notificationId },
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        createdAt: true,
+                    },
+                },
+            }
+        });
+        if (!notification) {
+            throw new Error('Notification not found');
+        }
+        return notification;
     }
 
 }

@@ -1,5 +1,5 @@
 import {Injectable} from '@angular/core';
-import {API_URL} from "../../constants/constants";
+import {API_PATH, API_URL} from "../../constants/constants";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {PartialEvent} from "../../interfaces/Event";
@@ -8,13 +8,13 @@ import {PartialEvent} from "../../interfaces/Event";
 	providedIn: 'root'
 })
 export class EventService {
-	private apiUrl = `${API_URL}/events`;
+	private apiUrl = `${API_URL}${API_PATH}/events`;
 
 	constructor(private http: HttpClient) {
 	}
 
-	getEvents(userId: number): Observable<any> {
-		return this.http.get(`${this.apiUrl}/${userId}`);
+	getEvents(): Observable<any> {
+		return this.http.get(`${this.apiUrl}/events`);
 	}
 
 	getEvent(eventId: number): Observable<any> {

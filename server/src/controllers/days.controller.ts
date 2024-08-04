@@ -12,13 +12,14 @@ export class DaysController {
     public getDays = async (req: UserRequest, res: Response): Promise<void> => {
         try {
             const { month } = req.body;
+            const userId = req.user?.userId;
 
-            if (!month) {
-                res.status(400).json({ message: 'Month date is required' });
+            if (!month || !userId) {
+                res.status(400).json({
+                    message: !month ? 'Month date is required' : 'UserId is required'
+                });
                 return;
             }
-
-            const userId = req.user?.userId;
 
             const user = await this.usersService.findUserById(userId!);
             if (!user) {
@@ -27,11 +28,8 @@ export class DaysController {
             }
 
             const monthDate = new Date(month);
-
             const { startDate, endDate } = DaysUtils.getPeriodDays(monthDate);
-
             const events = await this.eventsService.findEventsByPeriod(user.id!, startDate, endDate);
-
             const days = DaysUtils.getDays(monthDate, events);
 
             res.status(200).json({ days });

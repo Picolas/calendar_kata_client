@@ -17,12 +17,13 @@ export class UsersController {
     public getUserById = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = parseInt(req.params.id, 10);
-            const user = await this.usersService.findUserById(userId);
-            if (user) {
-                res.status(200).json(user);
-            } else {
-                res.status(404).json({ message: 'User not found' });
+            if (!userId) {
+                res.status(400).json({ message: 'User ID is required' });
+                return;
             }
+
+            const user = await this.usersService.findUserById(userId);
+            user ? res.status(200).json(user) : res.status(404).json({ message: 'User not found' });
         } catch (error) {
             const err = error as Error;
             res.status(500).json({ message: err.message });
@@ -32,6 +33,11 @@ export class UsersController {
     public updateUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = parseInt(req.params.id, 10);
+            if (!userId) {
+                res.status(400).json({ message: 'User ID is required' });
+                return;
+            }
+
             const updatedData = req.body;
             const updatedUser = await this.usersService.updateUser(userId, updatedData);
             res.status(200).json(updatedUser);
@@ -44,6 +50,11 @@ export class UsersController {
     public deleteUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = parseInt(req.params.id, 10);
+            if (!userId) {
+                res.status(400).json({ message: 'User ID is required' });
+                return;
+            }
+
             await this.usersService.deleteUser(userId);
             res.status(204).send();
         } catch (error) {

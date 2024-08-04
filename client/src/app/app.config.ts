@@ -5,6 +5,7 @@ import {CookieService} from "ngx-cookie-service";
 
 import {routes} from './app.routes';
 import {authInterceptor} from "./interceptors/AuthInterceptor/auth.interceptor";
+import {provideHotToastConfig} from "@ngxpert/hot-toast";
 
 export const appConfig: ApplicationConfig = {
 	providers: [
@@ -15,6 +16,11 @@ export const appConfig: ApplicationConfig = {
 				authInterceptor
 			])
 		),
+		provideHotToastConfig({
+			duration: 4000,
+			autoClose: true,
+			position: 'top-right',
+		}),
 		CookieService,
 	]
 };

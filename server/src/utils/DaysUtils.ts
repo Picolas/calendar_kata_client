@@ -3,6 +3,9 @@ import {Day} from "../interfaces/Day";
 
 export class DaysUtils {
 
+    static WEEK_LENGTH = 7;
+    static CALENDAR_LENGTH = 35;
+
     static getDays(month: Date, events: PartialEvent[]): Day[] {
         const year = month.getFullYear();
         const monthCp = month.getMonth();
@@ -37,7 +40,7 @@ export class DaysUtils {
         }
 
         // number of next month
-        const remainingDays = 35 - days.length;
+        const remainingDays = DaysUtils.CALENDAR_LENGTH - days.length;
         for (let i = 1; i <= remainingDays; i++) {
             days.push({
                 id: i.toString(),
@@ -61,17 +64,30 @@ export class DaysUtils {
                 if (normalizedDayDate >= normalizedEventStartDate && normalizedDayDate <= normalizedEventEndDate) {
                     day.events.push({ ...event, showHeader: false });
                 }
+
+                // sort events by date
+                day.events.sort((a, b) => {
+                    const dateA = new Date(a.startDate!);
+                    const dateB = new Date(b.startDate!);
+                    if (dateA < dateB) {
+                        return -1;
+                    } else if (dateA > dateB) {
+                        return 1;
+                    } else {
+                        return 0;
+                    }
+                });
             }
         }
 
         // every 7 days = last day of week in calendar
-        for (let i = 6; i < days.length; i += 7) {
+        for (let i = DaysUtils.WEEK_LENGTH - 1; i < days.length; i += DaysUtils.WEEK_LENGTH) {
             days[i].isLastDay = true;
         }
 
         // group days into weeks and set showHeader for events
-        for (let i = 0; i < days.length; i += 7) {
-            const week = days.slice(i, i + 7);
+        for (let i = 0; i < days.length; i += DaysUtils.WEEK_LENGTH) {
+            const week = days.slice(i, i + DaysUtils.WEEK_LENGTH);
             const eventMap = new Map<string, boolean>();
 
             for (const day of week) {
