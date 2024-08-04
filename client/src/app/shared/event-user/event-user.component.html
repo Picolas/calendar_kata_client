@@ -1,11 +1,13 @@
 <div class="user flex flex-col relative" (click)="onClickShowFullDetails()">
-  <div class="user-name">
+	@if (!showFullDetails) {
+		<div class="user-name">
     <span
-    class="text-sm text-bold text-white bg-indigo-300 rounded-sm px-1 py-0.5 cursor-pointer">{{ user?.name }}</span>
-  </div>
-  @if (showFullDetails) {
-    <div class="full-details absolute bg-indigo-100 rounded-sm px-1 py-0.5 cursor-pointer">
-      <span>{{ user?.email }}</span>
-    </div>
-  }
+		class="text-sm text-bold text-white bg-indigo-300 rounded-sm px-1 py-0.5 cursor-pointer">{{ user?.name }}</span>
+		</div>
+	} @else {
+		<div class="email">
+    <span
+		class="text-sm bg-indigo-100 rounded-sm px-1 py-0.5 cursor-pointer">{{ user?.email }}</span>
+		</div>
+	}
 </div>

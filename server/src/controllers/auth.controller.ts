@@ -7,8 +7,8 @@ export class AuthController {
     public login = async (req: Request, res: Response): Promise<void> => {
         try {
             const { email, password } = req.body;
-            const token = await this.authService.login(email, password);
-            res.status(200).json({ token });
+            const result = await this.authService.login(email, password);
+            res.status(200).json({ ...result });
         } catch (error) {
             const err = error as Error;
             res.status(401).json({ message: err.message });
@@ -36,8 +36,7 @@ export class AuthController {
 
             await this.authService.logout(token);
 
-            res.clearCookie('Authorization');
-            res.status(204).send();
+            res.clearCookie('Authorization').status(204).send();
         } catch (error) {
             const err = error as Error;
             res.status(500).json({ message: err.message });
@@ -46,12 +45,7 @@ export class AuthController {
 
     public refreshToken = async (req: Request, res: Response): Promise<void> => {
         try {
-            const authorization = req.headers.authorization;
-            if (!authorization) {
-                throw new Error('Authorization not found');
-            }
-
-            const token = authorization.split(' ')[1];
+            const token = req.headers.authorization?.split(' ')[1];
             if (!token) {
                 throw new Error('Token not found');
             }

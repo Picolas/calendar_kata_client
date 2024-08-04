@@ -1,11 +1,19 @@
 .notifications {
 	position: absolute;
 	top: 20px;
-	transform: translate(-50%, 0);
-	left: 50%;
+	right: 0;
 	padding: 10px;
 	width: 250px;
+	max-width: 90vw;
 	display: flex;
 	flex-direction: column;
 	gap: 5px;
+	overflow-y: auto;
+	box-sizing: border-box;
+	z-index: 10;
+	max-height: 200px;
+
+	::-webkit-scrollbar {
+		width: 0;
+	}
 }

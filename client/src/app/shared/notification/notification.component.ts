@@ -1,5 +1,6 @@
 import {Component, Input} from '@angular/core';
 import {PartialNotification} from "../../interfaces/Notification";
+import {NotificationService} from "../../services/NotificationService/notification.service";
 
 @Component({
 	selector: 'app-notification',
@@ -11,7 +12,15 @@ import {PartialNotification} from "../../interfaces/Notification";
 export class NotificationComponent {
 	@Input() notification: PartialNotification | null = null;
 
+	constructor(private notificationService: NotificationService) {
+	}
+
 	onClickMarkAsRead() {
-		console.log(`Mark as read ${this.notification!.id}`);
+		this.notificationService.markAsRead(this.notification!).subscribe(
+			() => {
+				this.notification!.read = true;
+				this.notificationService.readNotification(this.notification!);
+			}
+		);
 	}
 }

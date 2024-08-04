@@ -1,12 +1,18 @@
-@if (event) {
-	<div class="my-1 rounded relative p-5 border-slate-300 border-solid border-s-2 bg-slate-100">
-		<form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
+<div class="container mx-auto my-5">
+	<div class="mb-5">
+		<h1 class="text-3xl font-bold">
+			Ajouter un évênement
+		</h1>
+	</div>
+	<div
+		class="mb-5 flex flex-col gap-2 my-1 rounded relative p-5 border-slate-300 border-solid border-s-2 bg-slate-100">
+		<form [formGroup]="addEventForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
 			<div class="title flex flex-col">
 				<label for="title">Titre</label>
 				<input type="text" id="title" formControlName="title"
 					   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 					   required/>
-				@if (eventForm.get('title')?.invalid && eventForm.get('title')?.dirty) {
+				@if (addEventForm.get('title')?.invalid && addEventForm.get('title')?.dirty) {
 					<div class="text-red-500 text-sm">
 						Le titre est requis.
 					</div>
@@ -17,7 +23,7 @@
 				<textarea type="text" id="description" formControlName="description"
 						  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 						  required></textarea>
-				@if (eventForm.get('description')?.invalid && eventForm.get('description')?.dirty) {
+				@if (addEventForm.get('description')?.invalid && addEventForm.get('description')?.dirty) {
 					<div class="text-red-500 text-sm">
 						La description est requise.
 					</div>
@@ -29,7 +35,7 @@
 					<input
 						class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 						type="datetime-local" id="startDate" formControlName="startDate" required>
-					@if (eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.dirty) {
+					@if (addEventForm.get('startDate')?.invalid && addEventForm.get('startDate')?.dirty) {
 						<div class="text-red-500 text-sm">
 							La date de début est requise.
 						</div>
@@ -40,48 +46,43 @@
 					<input
 						class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
 						type="datetime-local" id="endDate" formControlName="endDate" required>
-					@if (eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.dirty) {
+					@if (addEventForm.get('endDate')?.invalid && addEventForm.get('endDate')?.dirty) {
 						<div class="text-red-500 text-sm">
 							La date de fin est requise.
 						</div>
 					}
 				</div>
 			</div>
-			<!--
 			<div class="participants flex flex-col gap-2 mb-2">
-			  <label for="participants">Participants</label>
-			  <div formArrayName="inUser">
-				@for (user of inUser.controls; let i = index; track user) {
-				  <div class="flex flex-row gap-1 mb-0.5">
-					<input
-					  class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-					  [formControlName]="i" placeholder="Email du participant">
-					<button
-					  class="text-slate-950"
-					  type="button" (click)="removeParticipant(i)">X
-					</button>
-					@if (user.invalid && user.touched) {
-					  <div class="text-red-500 text-sm">
-						Email invalide.
-					  </div>
+				<label for="participants">Participants</label>
+				<div formArrayName="inUser">
+					@for (user of inUser.controls; let i = $index; track user) {
+						<div class="flex flex-col gap-1">
+							<div class="flex flex-row gap-1 mb-0.5">
+								<input
+									class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+									[formControlName]="i" placeholder="Email du participant">
+								<button class="text-slate-950" type="button" (click)="removeParticipant(i)">X</button>
+							</div>
+							@if (user.invalid && user.dirty) {
+								<div class="text-red-500 text-sm">
+									Email invalide.
+								</div>
+							}
+						</div>
 					}
-				  </div>
-				}
-			  </div>
-			  <div class="add-participant">
-				<button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
-				  type="button" (click)="addParticipant()">Ajouter un participant
-				</button>
-			  </div>
+				</div>
+				<div class="add-participant">
+					<button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
+							type="button" (click)="addParticipant()">Ajouter un participant
+					</button>
+				</div>
 			</div>
-			-->
-			<hr>
 			<div class="save">
-				<button [disabled]="eventForm.invalid"
-						class="text-slate-50 py-0.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-md"
-						type="submit">Enregistrer
+				<button class="text-slate-50 py-0.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-md"
+						type="submit">Créer
 				</button>
 			</div>
 		</form>
 	</div>
-}
+</div>

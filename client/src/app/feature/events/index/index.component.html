@@ -1,0 +1,14 @@
+<div class="container mx-auto my-5">
+	<div class="mb-5">
+		<h1 class="text-3xl font-bold">
+			Events
+		</h1>
+	</div>
+	<div class="mb-5 flex flex-col gap-2">
+		@for (event of events; track event.id) {
+			<app-event [event]="event"></app-event>
+		} @empty {
+			<p>Vous n'avez aucun évênement de prévu !</p>
+		}
+	</div>
+</div>

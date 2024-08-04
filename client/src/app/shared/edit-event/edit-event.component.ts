@@ -7,13 +7,14 @@ import {EventPopupService} from "../../services/EventPopupService/event-popup.se
 import {catchError} from "rxjs/operators";
 import {EMPTY} from "rxjs";
 import {RefreshDaysService} from "../../services/RefreshDaysService/refresh-days.service";
+import {HotToastService} from "@ngxpert/hot-toast";
 
 @Component({
 	selector: 'app-edit-event',
 	standalone: true,
 	imports: [
-    ReactiveFormsModule
-],
+		ReactiveFormsModule
+	],
 	templateUrl: './edit-event.component.html',
 	styleUrl: './edit-event.component.css'
 })
@@ -28,7 +29,7 @@ export class EditEventComponent implements OnInit {
 		//inUser: FormArray
 	}>;
 
-	constructor(private fb: FormBuilder, private eventService: EventService, private eventPopupService: EventPopupService, private refreshDaysService: RefreshDaysService) {
+	constructor(private fb: FormBuilder, private eventService: EventService, private eventPopupService: EventPopupService, private refreshDaysService: RefreshDaysService, private toast: HotToastService) {
 		this.eventForm = this.fb.group({
 			title: this.fb.control('', Validators.required),
 			description: this.fb.control('', Validators.required),
@@ -92,6 +93,7 @@ export class EditEventComponent implements OnInit {
 				this.event = null;
 				this.eventPopupService.closeModal();
 				this.refreshDaysService.refreshEvents(startDate, endDate);
+				this.toast.success(`L'événement ${event.title} a bien été modifié`);
 			}
 		);
 	}

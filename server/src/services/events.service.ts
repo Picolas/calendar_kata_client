@@ -1,20 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import {Event, PartialEvent} from '../interfaces/Event';
 import {DaysUtils} from "../utils/DaysUtils";
+import {PartialUser} from "../interfaces/User";
 
 export class EventsService {
     private prisma = new PrismaClient();
 
     public async findAllEvents(): Promise<PartialEvent[]> {
         return this.prisma.event.findMany({
-            include: {
-                creator: true,
-                inUser: {
-                    include: {
-                        user: true,
-                    },
-                },
-            },
+            include: this.eventDetails,
         }).then(events => events.map(event => ({
             ...event,
             inUser: event.inUser.map(userEvent => userEvent.user),
@@ -24,14 +18,7 @@ export class EventsService {
     public async findEventById(eventId: number): Promise<PartialEvent> {
         const event = await this.prisma.event.findUnique({
             where: { id: eventId },
-            include: {
-                creator: true,
-                inUser: {
-                    include: {
-                        user: true,
-                    },
-                },
-            },
+            include: this.eventDetails,
         });
         if (!event) {
             throw new Error('Event not found');
@@ -52,14 +39,7 @@ export class EventsService {
                 },
                 createdAt: new Date(),
             },
-            include: {
-                creator: true,
-                inUser: {
-                    include: {
-                        user: true,
-                    },
-                },
-            },
+            include: this.eventDetails
         });
         return {
             ...event,
@@ -72,12 +52,12 @@ export class EventsService {
         if (!event) {
             throw new Error('Event not found');
         }
-        const { id, createdAt, inUser, showHeader, ...updateData } = data; // Exclude `id` and `createdAt` from the update data
+        const { id, creator,createdAt, inUser, showHeader, ...updateData } = data; // Exclude `id` and `createdAt` from the update data
         const updatedEvent = await this.prisma.event.update({
             where: { id: eventId },
             data: {
                 ...updateData,
-                creator: data.creator ? { connect: { id: data.creator.id } } : undefined,
+                //creator: data.creator ? { connect: { id: data.creator.id } } : undefined,
                 /*
                 inUser: data.inUser ? {
                     create: data.inUser.map(user => ({ user: { connect: { id: user.id } } })),
@@ -85,7 +65,9 @@ export class EventsService {
                  */
             },
             include: {
-                creator: true,
+                creator: {
+                    select: this.userDetails
+                },
                 /*
                 inUser: {
                     include: {
@@ -129,14 +111,7 @@ export class EventsService {
                     lte: end,
                 },
             },
-            include: {
-                creator: true,
-                inUser: {
-                    include: {
-                        user: true,
-                    },
-                },
-            },
+            include: this.eventDetails
         });
 
         return events.map(event => ({
@@ -164,16 +139,25 @@ export class EventsService {
                     },
                 ],
             },
+            include: this.eventDetails
+        });
+
+        // also add events where the user is in the inUser relation
+        const userEvents = await this.prisma.usersOnEvents.findMany({
+            where: {
+                userId,
+            },
             include: {
-                creator: true,
-                inUser: {
-                    select: {
-                        user: {
+                event: {
+                    include: {
+                        creator: {
+                            select: this.userDetails
+                        },
+                        inUser: {
                             select: {
-                                id: true,
-                                name: true,
-                                email: true,
-                                createdAt: true,
+                                user: {
+                                    select: this.userDetails,
+                                },
                             },
                         },
                     },
@@ -181,25 +165,114 @@ export class EventsService {
             },
         });
 
-        return events.map(event => ({
-            id: event.id,
-            title: event.title,
-            description: event.description,
-            startDate: event.startDate,
-            endDate: event.endDate,
-            createdAt: event.createdAt,
-            creator: {
-                id: event.creator.id,
-                name: event.creator.name,
-                email: event.creator.email,
-                createdAt: event.creator.createdAt,
-            },
-            inUser: event.inUser.map(userRelation => ({
-                id: userRelation.user.id,
-                name: userRelation.user.name,
-                email: userRelation.user.email,
-                createdAt: userRelation.user.createdAt,
-            })),
+        const userEventsData = userEvents.map(userEvent => userEvent.event);
+        const allEvents = [...events, ...userEventsData];
+
+        return allEvents.map(event => ({
+            ...event,
+            inUser: event.inUser.map(userEvent => userEvent.user),
         }));
+    }
+
+    public async getUsersForEvent(eventId: number): Promise<PartialUser[]> {
+        const users = await this.prisma.usersOnEvents.findMany({
+            where: {
+                eventId,
+            },
+            include: {
+                user: {
+                    select: this.userDetails
+                },
+            },
+        });
+
+        return users.map(userEvent => ({
+            id: userEvent.user.id,
+            name: userEvent.user.name,
+            email: userEvent.user.email,
+            createdAt: userEvent.user.createdAt,
+        }));
+    }
+
+    public async checkUserCreatedEvent(eventId: number, userId: number): Promise<boolean> {
+        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+        if (!event) {
+            throw new Error('Event not found');
+        }
+        return event.creatorId === userId;
+    }
+
+    public async getEventCreator(eventId: number): Promise<PartialUser> {
+        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
+        if (!event) {
+            throw new Error('Event not found');
+        }
+
+        const creator = await this.prisma.user.findUnique({ where: { id: event.creatorId } });
+        if (!creator) {
+            throw new Error('Event creator not found');
+        }
+
+        return {
+            id: creator.id,
+            name: creator.name,
+            email: creator.email,
+            createdAt: creator.createdAt,
+        };
+    }
+
+    public async getUserEvents(userId: number): Promise<PartialEvent[]> {
+        const events = await this.prisma.event.findMany({
+            where: {
+                OR: [
+                    {
+                        creatorId: userId,
+                    },
+                    {
+                        inUser: {
+                            some: {
+                                userId,
+                            },
+                        },
+                    },
+                ],
+            },
+            include: {
+                creator: {
+                    select: this.userDetails
+                },
+                inUser: {
+                    include: {
+                        user: {
+                            select: this.userDetails
+                        },
+                    },
+                },
+            },
+        });
+        return events.map(event => ({
+            ...event,
+            inUser: event.inUser.map(userEvent => userEvent.user),
+        }));
+    }
+
+    private userDetails = {
+            id: true,
+            name: true,
+            email: true,
+            createdAt: true,
+    }
+
+    private eventDetails = {
+        creator: {
+            select: this.userDetails
+        },
+        inUser: {
+            include: {
+                user: {
+                    select: this.userDetails
+                }
+            }
+        }
     }
 }

@@ -17,7 +17,6 @@ export class AuthService {
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
-
         const newUser = await this.prisma.user.create({
             data: {
                 name,
@@ -26,20 +25,21 @@ export class AuthService {
             },
         });
 
-        const { password: _, ...partialUser } = newUser;
-        return partialUser;
+        return this.stripPassword(newUser);
     }
 
     public async login(email: string, password: string): Promise<{ token: string, cookie: string, user: PartialUser }> {
         const user = await this.prisma.user.findUnique({ where: { email } });
-        if (!user || !(await bcrypt.compare(password, user.password))) {
+
+        const isPasswordValid = user && await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
             throw new Error('Invalid email or password');
         }
+
         const token = this.createToken(user);
         const cookie = this.createCookie(token);
 
-        const { password: _, ...partialUser } = user;
-        return { token, cookie, user: partialUser };
+        return { token, cookie, user: this.stripPassword(user) };
     }
 
     public async logout(token: string) {
@@ -54,16 +54,21 @@ export class AuthService {
         return `Authorization=${token}; HttpOnly; Path=/; Max-Age=3600`;
     }
 
-    public verifyToken(token: string) {
+    public verifyToken(token: string): DecodedUser {
         try {
-            return jwt.verify(token, this.jwtSecret);
+            return jwt.verify(token, this.jwtSecret) as DecodedUser;
         } catch (error) {
             throw new Error('Invalid token');
         }
     }
 
     public refreshToken(token: string) {
-        const decoded = this.verifyToken(token) as DecodedUser;
-        return this.createToken({ id: decoded.userId } as User);
+        const decodedUser = this.verifyToken(token);
+        return this.createToken({ id: decodedUser.userId } as User);
+    }
+
+    private stripPassword(user: PartialUser) {
+        const { password: _, ...partialUser } = user;
+        return partialUser;
     }
 }

@@ -2,13 +2,13 @@ import {Injectable} from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {PartialDay} from "../../interfaces/Day";
-import {API_URL} from "../../constants/constants";
+import {API_PATH, API_URL} from "../../constants/constants";
 
 @Injectable({
 	providedIn: 'root'
 })
 export class DaysService {
-	private apiUrl = `${API_URL}/days`;
+	private apiUrl = `${API_URL}${API_PATH}/days`;
 
 	constructor(private http: HttpClient) {
 	}

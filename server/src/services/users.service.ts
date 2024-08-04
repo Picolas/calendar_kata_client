@@ -6,10 +6,8 @@ export class UsersService {
     public prisma = new PrismaClient();
 
     public async findAllUsers(): Promise<PartialUser[]> {
-        return this.prisma.user.findMany().then(users => users.map(user => {
-            const { password: _, ...partialUser } = user;
-            return partialUser;
-        }));
+        const users = await this.prisma.user.findMany();
+        return users.map(this.withoutPassword);
     }
 
     public async findUserById(userId: number): Promise<PartialUser> {
@@ -17,9 +15,7 @@ export class UsersService {
         if (!user) {
             throw new Error('User not found');
         }
-
-        const { password: _, ...partialUser } = user;
-        return partialUser;
+        return this.withoutPassword(user);
     }
 
     public async updateUser(userId: number, data: PartialUser): Promise<PartialUser> {
@@ -38,8 +34,7 @@ export class UsersService {
             },
         });
 
-        const { password: _, ...partialUser } = updatedUser;
-        return partialUser;
+        return this.withoutPassword(updatedUser);
     }
 
     public async deleteUser(userId: number): Promise<PartialUser> {
@@ -49,7 +44,19 @@ export class UsersService {
         }
         const deletedUser = await this.prisma.user.delete({ where: { id: userId } });
 
-        const { password: _, ...partialUser } = deletedUser;
-        return partialUser;
+        return this.withoutPassword(deletedUser);
+    }
+
+    public async findUserByEmail(email: string): Promise<PartialUser | null> {
+        const user = await this.prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            return null;
+        }
+
+        return this.withoutPassword(user);
+    }
+
+    private withoutPassword({ password: _, ...rest }: User): PartialUser {
+        return rest;
     }
 }

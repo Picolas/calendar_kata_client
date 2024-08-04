@@ -3,15 +3,17 @@ import {HttpClient} from '@angular/common/http';
 import {Observable, of} from 'rxjs';
 import {catchError, tap} from 'rxjs/operators';
 import {CookieService} from 'ngx-cookie-service';
-import {API_URL} from '../../constants/constants';
+import {API_PATH, API_URL} from '../../constants/constants';
+import {PartialUser} from "../../interfaces/User";
 
 @Injectable({
 	providedIn: 'root'
 })
 export class AuthService {
-	private apiUrl = `${API_URL}/auth`;
+	private apiUrl = `${API_URL}${API_PATH}/auth`;
 	private tokenKey = 'authToken';
-	userId: number | null = null;
+	private userKey = 'user';
+	user: PartialUser | null = null;
 
 	constructor(private http: HttpClient, private cookieService: CookieService) {
 	}
@@ -19,16 +21,22 @@ export class AuthService {
 	login(email: string, password: string): Observable<any> {
 		return this.http.post<any>(`${this.apiUrl}/login`, {email, password}).pipe(
 			tap(response => {
-				if (response.token.token) {
-					this.cookieService.set(this.tokenKey, response.token.token, {
+				if (response.token) {
+					this.cookieService.set(this.tokenKey, response.token, {
 						path: '/',
 						secure: true,
 						sameSite: 'Strict',
 						expires: new Date(new Date().getTime() + 3600 * 1000)
 					});
 				}
-				if (response.token.user.id) {
-					this.userId = response.token.user.id;
+				if (response.user) {
+					const userJson = JSON.stringify(response.user);
+					this.cookieService.set(this.userKey, userJson, {
+						path: '/',
+						secure: true,
+						sameSite: 'Strict',
+					});
+					this.user = response.user;
 				}
 			}),
 			catchError(error => {
@@ -59,6 +67,7 @@ export class AuthService {
 
 	logout(): void {
 		this.cookieService.delete(this.tokenKey, '/');
+		this.cookieService.delete(this.userKey, '/');
 	}
 
 	isAuthenticated(): boolean {
@@ -81,7 +90,7 @@ export class AuthService {
 					});
 				}
 				if (response.token.userId) {
-					this.userId = response.token.userId;
+					this.user!.id = response.token.userId;
 				}
 			}),
 			catchError(error => {
@@ -91,12 +100,15 @@ export class AuthService {
 		);
 	}
 
-	getUserId(): number | null {
-		if (this.userId === null) {
-			this.refreshToken().subscribe(() => {
-				return this.userId;
-			});
+	getUser(): PartialUser | null {
+		if (this.user === null) {
+			const user = this.cookieService.get(this.userKey);
+			if (user) {
+				this.user = JSON.parse(user);
+			} else {
+				this.logout();
+			}
 		}
-		return this.userId;
+		return this.user;
 	}
 }
