@@ -4,7 +4,7 @@
 	<div class="day-header">
 		@if (day?.date | isFirstOrLastDayMonth) {
 			<div class="day-month">
-				{{ day?.date | date: 'MMMM' }}
+				{{ day?.date | customFrenchDate: 'MMMM' }}
 			</div>
 		}
 		<div class="day-number">
