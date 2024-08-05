@@ -4,10 +4,10 @@ import * as http from 'node:http';
 export class SocketController {
     private io: Server;
 
-    constructor(server: http.Server, origin: string) {
+    constructor(server: http.Server, origins: string[]) {
         this.io = new Server(server, {
             cors: {
-                origin: origin,
+                origin: '*',
                 methods: ["GET", "POST"]
             }
         });
