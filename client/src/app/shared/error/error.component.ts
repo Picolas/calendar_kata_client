@@ -1,4 +1,5 @@
 import {Component, Input} from '@angular/core';
+import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
 
 @Component({
 	selector: 'app-error',
@@ -9,4 +10,12 @@ import {Component, Input} from '@angular/core';
 })
 export class ErrorComponent {
 	@Input() error: any = null;
+
+	constructor(private errorStateService: ErrorStateService) {
+	}
+
+	onClickCloseError() {
+		this.errorStateService.setError(null);
+		this.error = null;
+	}
 }

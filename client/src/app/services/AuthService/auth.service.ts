@@ -5,6 +5,7 @@ import {catchError, tap} from 'rxjs/operators';
 import {CookieService} from 'ngx-cookie-service';
 import {API_PATH, API_URL} from '../../constants/constants';
 import {PartialUser} from "../../interfaces/User";
+import {ErrorStateService} from "../ErrorStateService/error-state.service";
 
 @Injectable({
 	providedIn: 'root'
@@ -15,7 +16,7 @@ export class AuthService {
 	private userKey = 'user';
 	user: PartialUser | null = null;
 
-	constructor(private http: HttpClient, private cookieService: CookieService) {
+	constructor(private http: HttpClient, private cookieService: CookieService, private errorStateService: ErrorStateService) {
 	}
 
 	login(email: string, password: string): Observable<any> {
@@ -40,7 +41,8 @@ export class AuthService {
 				}
 			}),
 			catchError(error => {
-				console.error('Login error:', error);
+				console.error('Login:', error);
+				this.errorStateService.setError(error.error.message);
 				return of({error: 'Login failed. Please check your credentials and try again.'});
 			})
 		);
@@ -60,6 +62,7 @@ export class AuthService {
 			}),
 			catchError(error => {
 				console.error('Registration error:', error);
+				this.errorStateService.setError(error.error.message);
 				return of({error: 'Registration failed. Please check your details and try again.'});
 			})
 		);

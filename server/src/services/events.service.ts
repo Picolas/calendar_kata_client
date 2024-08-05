@@ -32,7 +32,10 @@ export class EventsService {
     public async createEvent(data: Omit<Event, 'id' | 'createdAt'>): Promise<PartialEvent> {
         const event = await this.prisma.event.create({
             data: {
-                ...data,
+                title: data.title,
+                description: data.description,
+                startDate: new Date(data.startDate).toISOString(),
+                endDate: new Date(data.endDate).toISOString(),
                 creator: { connect: { id: data.creator.id } },
                 inUser: {
                     create: data.inUser.map(user => ({ user: { connect: { id: user.id } } })),
