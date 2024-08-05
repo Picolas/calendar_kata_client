@@ -6,6 +6,7 @@ export interface FormatMap {
 	mm: string;
 	m: string;
 	yyyy: string;
+	MM: string;
 	MMMM: string;
 	ddd: string;
 	dddd: string;

@@ -1,5 +1,5 @@
 import {Component} from '@angular/core';
-import {WEEK_DAYS} from "../../constants/constants";
+import {SHORT_WEEK_DAYS} from "../../constants/constants";
 
 @Component({
 	selector: 'app-weeks',
@@ -9,6 +9,5 @@ import {WEEK_DAYS} from "../../constants/constants";
 	styleUrl: './weeks.component.css'
 })
 export class WeeksComponent {
-	weeks: string[] = WEEK_DAYS;
-
+	weeks: string[] = SHORT_WEEK_DAYS;
 }
