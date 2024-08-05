@@ -3,15 +3,17 @@ import {EventComponent} from "../../../shared/event/event.component";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {EventService} from "../../../services/EventService/event.service";
 import {catchError} from "rxjs/operators";
-import {EMPTY} from "rxjs";
+import {of} from "rxjs";
 import {HotToastService} from "@ngxpert/hot-toast";
+import {ErrorComponent} from "../../../shared/error/error.component";
 
 @Component({
 	selector: 'app-create',
 	standalone: true,
 	imports: [
 		EventComponent,
-		ReactiveFormsModule
+		ReactiveFormsModule,
+		ErrorComponent
 	],
 	templateUrl: './create.component.html',
 	styleUrl: './create.component.css'
@@ -24,6 +26,8 @@ export class CreateComponent {
 		endDate: FormControl,
 		inUser: FormArray
 	}>;
+
+	error = null;
 
 	constructor(private fb: FormBuilder, private eventService: EventService, private toast: HotToastService) {
 		this.addEventForm = this.fb.group({
@@ -63,7 +67,8 @@ export class CreateComponent {
 		this.eventService.createEvent(event).pipe(
 			catchError(error => {
 				console.error('Error submit edition', error);
-				return EMPTY;
+				this.error = error.error.message;
+				return of(null);
 			})
 		).subscribe(() => {
 			this.toast.success(`L'événement ${event.title} a bien été créé`);

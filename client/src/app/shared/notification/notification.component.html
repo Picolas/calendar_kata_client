@@ -1,2 +1,4 @@
-<p (click)="onClickMarkAsRead()"
-   class="rounded-md bg-slate-50 py-0.5 px-1 text-xs border-2 border-solid border-slate-200 truncate cursor-pointer">{{ notification?.content }}</p>
+<div class="relative">
+	<p (click)="onClickMarkAsRead()" [class.truncate]="!hoverContent"
+	   class="rounded-md bg-slate-50 py-1 px-1.5 text-xs border-2 border-solid border-slate-200 cursor-pointer hover:bg-white">{{ notification?.content }}</p>
+</div>

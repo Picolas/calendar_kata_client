@@ -6,13 +6,14 @@ import {DatePipe} from "@angular/common";
 import {EventPopupService} from "../../services/EventPopupService/event-popup.service";
 import {EventService} from "../../services/EventService/event.service";
 import {catchError} from "rxjs/operators";
-import {EMPTY} from "rxjs";
+import {of} from "rxjs";
 import {EventUserComponent} from "../event-user/event-user.component";
 import {EditEventComponent} from "../edit-event/edit-event.component";
 import {IsMultipleDayPipe} from "../../pipes/IsMultipleDay/is-multiple-day.pipe";
 import {RefreshDaysService} from "../../services/RefreshDaysService/refresh-days.service";
 import {AuthService} from "../../services/AuthService/auth.service";
 import {PartialUser} from "../../interfaces/User";
+import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
 
 @Component({
 	selector: 'app-popup-event',
@@ -34,7 +35,7 @@ export class PopupEventComponent {
 	isEditOpen = false;
 	user: PartialUser | null = null;
 
-	constructor(private eventPopupService: EventPopupService, private eventService: EventService, private refreshDaysService: RefreshDaysService, private authService: AuthService) {
+	constructor(private eventPopupService: EventPopupService, private eventService: EventService, private refreshDaysService: RefreshDaysService, private authService: AuthService, private errorStateService: ErrorStateService) {
 	}
 
 	ngOnInit() {
@@ -56,7 +57,8 @@ export class PopupEventComponent {
 			this.eventService.deleteEvent(this.event!.id!).pipe(
 				catchError(error => {
 					console.error('EventComponent.deleteEvent', error);
-					return EMPTY;
+					this.errorStateService.setError(error.error.message);
+					return of(null);
 				}),
 			).subscribe(() => {
 				this.event = null;
