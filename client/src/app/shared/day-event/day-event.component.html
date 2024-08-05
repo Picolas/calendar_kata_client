@@ -1,13 +1,15 @@
-<div class="day-event rounded text-xxs" (click)="onClickEvent($event)">
+<div
+	class="day-event my-1 mx-0.5 sm:mx-1 sm:my-1 md:mx-2 md:my-1 lg:mx-2 lg:my-1 rounded text-xxxs sm:text-xxxs md:text-xxs lg:text-xxs"
+	(click)="onClickEvent($event)">
 	@if (!(event?.startDate | isMultipleDay: event?.endDate)) {
 		<span
-			class="text-xxs text-center px-0.5 py-0.5 bg-indigo-100 rounded-md ml-0.5 mr-1">
+			class="text-xxxs sm:text-xxxs md:text-xxs lg:text-xxs text-center px-0.5 py-0.5 bg-indigo-100 rounded-md ml-0.5 mr-1">
         {{ event?.startDate | date: 'HH:mm':'UTC' }}</span>
 	}
 	{{ event?.title }}
 
 	@if (showDescription && day && day.events && day.events.length <= maxEventUntilReduce) {
-		<div class="event-description line-clamp-2 text-xs"
+		<div class="event-description line-clamp-2 text-xxxs sm:text-xxxs md:text-xxs lg:text-xxs"
 		>{{ event?.description }}
 		</div>
 	}

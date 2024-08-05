@@ -5,15 +5,18 @@ import {EventService} from "../../services/EventService/event.service";
 
 import {EventPopupService} from "../../services/EventPopupService/event-popup.service";
 import {catchError} from "rxjs/operators";
-import {EMPTY} from "rxjs";
+import {of} from "rxjs";
 import {RefreshDaysService} from "../../services/RefreshDaysService/refresh-days.service";
 import {HotToastService} from "@ngxpert/hot-toast";
+import {ErrorComponent} from "../error/error.component";
+import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
 
 @Component({
 	selector: 'app-edit-event',
 	standalone: true,
 	imports: [
-		ReactiveFormsModule
+		ReactiveFormsModule,
+		ErrorComponent
 	],
 	templateUrl: './edit-event.component.html',
 	styleUrl: './edit-event.component.css'
@@ -29,7 +32,7 @@ export class EditEventComponent implements OnInit {
 		//inUser: FormArray
 	}>;
 
-	constructor(private fb: FormBuilder, private eventService: EventService, private eventPopupService: EventPopupService, private refreshDaysService: RefreshDaysService, private toast: HotToastService) {
+	constructor(private fb: FormBuilder, private eventService: EventService, private eventPopupService: EventPopupService, private refreshDaysService: RefreshDaysService, private toast: HotToastService, private errorStateService: ErrorStateService) {
 		this.eventForm = this.fb.group({
 			title: this.fb.control('', Validators.required),
 			description: this.fb.control('', Validators.required),
@@ -87,7 +90,8 @@ export class EditEventComponent implements OnInit {
 		this.eventService.updateEvent(updatedEvent).pipe(
 			catchError(error => {
 				console.error('Error submit edition', error);
-				return EMPTY;
+				this.errorStateService.setError(error.error.message);
+				return of(null);
 			})
 		).subscribe(event => {
 				this.event = null;

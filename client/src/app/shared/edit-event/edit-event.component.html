@@ -4,7 +4,7 @@
 			<div class="title flex flex-col">
 				<label for="title">Titre</label>
 				<input type="text" id="title" formControlName="title"
-					   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					   class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
 					   required/>
 				@if (eventForm.get('title')?.invalid && eventForm.get('title')?.dirty) {
 					<div class="text-red-500 text-sm">
@@ -15,7 +15,7 @@
 			<div class="description flex flex-col">
 				<label for="description">Description</label>
 				<textarea type="text" id="description" formControlName="description"
-						  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+						  class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
 						  required></textarea>
 				@if (eventForm.get('description')?.invalid && eventForm.get('description')?.dirty) {
 					<div class="text-red-500 text-sm">
@@ -23,11 +23,11 @@
 					</div>
 				}
 			</div>
-			<div class="event-dates flex flex-row gap-2">
+			<div class="event-dates flex flex-col sm:flex-col md:flex-row lg:flex-row gap-2">
 				<div class="start-date flex flex-col">
 					<label for="startDate">Date de début</label>
 					<input
-						class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+						class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
 						type="datetime-local" id="startDate" formControlName="startDate" required>
 					@if (eventForm.get('startDate')?.invalid && eventForm.get('startDate')?.dirty) {
 						<div class="text-red-500 text-sm">
@@ -38,7 +38,7 @@
 				<div class="end-date flex flex-col">
 					<label for="endDate">Date de fin</label>
 					<input
-						class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+						class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
 						type="datetime-local" id="endDate" formControlName="endDate" required>
 					@if (eventForm.get('endDate')?.invalid && eventForm.get('endDate')?.dirty) {
 						<div class="text-red-500 text-sm">
@@ -54,7 +54,7 @@
 				@for (user of inUser.controls; let i = index; track user) {
 				  <div class="flex flex-row gap-1 mb-0.5">
 					<input
-					  class="mt-1 block px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
+					  class="mt-1 block px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
 					  [formControlName]="i" placeholder="Email du participant">
 					<button
 					  class="text-slate-950"
