@@ -12,16 +12,20 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 const api = '/api';
+const origins = process.env.CLIENTS_URL!.split(',');
+console.log(origins)
 
-app.use(cors());
+app.use(cors({
+    origin: '*',
+    credentials: true
+}));
 app.use(express.json());
 app.get('/', (req, res) => {
     res.send('Hello, TypeScript with Express!');
 });
 
 const server = http.createServer(app);
-const origin = process.env.CLIENT_URL!;
-const socketController = new SocketController(server, origin);
+const socketController = new SocketController(server, origins);
 const io = socketController.getIO();
 
 configureRoutes(app, io);
