@@ -70,8 +70,10 @@ export class CreateComponent {
 				this.error = error.error.message;
 				return of(null);
 			})
-		).subscribe(() => {
-			this.toast.success(`L'événement ${event.title} a bien été créé`);
+		).subscribe((response) => {
+			if (response) {
+				this.toast.success(`L'événement ${event.title} a bien été créé`);
+			}
 		});
 	}
 
