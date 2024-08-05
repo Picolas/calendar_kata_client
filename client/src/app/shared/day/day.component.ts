@@ -19,7 +19,7 @@ import {CustomFrenchDatePipe} from "../../pipes/CustomFrenchDate/custom-french-d
 		IsDayTodayPipe,
 		IsPastDayPipe,
 		IsFirstOrLastDayMonthPipe,
-		CustomFrenchDatePipe
+		CustomFrenchDatePipe,
 	],
 	templateUrl: './day.component.html',
 	styleUrl: './day.component.css'

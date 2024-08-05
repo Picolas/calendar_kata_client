@@ -27,7 +27,6 @@
 
 .day-header {
 	padding: 0 10px;
-	font-size: 1.3em;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;

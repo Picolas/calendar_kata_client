@@ -13,6 +13,7 @@ export class CustomFrenchDatePipe implements PipeTransform {
 		'mm': '2-digit',
 		'm': 'numeric',
 		'yyyy': 'numeric',
+		'MM': 'short',
 		'MMMM': 'long',
 		'ddd': 'short',
 		'dddd': 'long',
@@ -24,7 +25,7 @@ export class CustomFrenchDatePipe implements PipeTransform {
 		}
 		date = new Date(date);
 
-		const formatPieces = format.match(/(d+|m+|y+|MMMM|ddd|dddd)/g);
+		const formatPieces = format.match(/(d+|m+|y+|MMMM|MM|ddd|dddd)/g);
 
 		const dateOptions: Intl.DateTimeFormatOptions = {
 			day: undefined,
@@ -38,8 +39,8 @@ export class CustomFrenchDatePipe implements PipeTransform {
 				if (['d', 'dd'].includes(piece)) {
 					dateOptions.day = this.formatMap[piece] as "2-digit" | "numeric";
 				}
-				if (['m', 'mm', 'MMMM'].includes(piece)) {
-					dateOptions.month = this.formatMap[piece] as "2-digit" | "numeric" | "long";
+				if (['m', 'mm', 'MM', 'MMMM'].includes(piece)) {
+					dateOptions.month = this.formatMap[piece] as "2-digit" | "numeric" | "short" | "long";
 				}
 				if (['yyyy'].includes(piece)) {
 					dateOptions.year = this.formatMap[piece] as "numeric";

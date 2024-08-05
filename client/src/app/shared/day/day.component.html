@@ -1,10 +1,10 @@
 <div class="day" [class.last-day]="day?.isLastDay" [class.today]="day?.date | isDayToday"
 	 [class.past-day]="day?.date | isPastDay"
 	 (click)="onClickDay($event)">
-	<div class="day-header">
+	<div class="day-header text-sm sm:text-sm md:text-base lg:text-xl">
 		@if (day?.date | isFirstOrLastDayMonth) {
 			<div class="day-month">
-				{{ day?.date | customFrenchDate: 'MMMM' }}
+				{{ day?.date | customFrenchDate: 'MM' }}
 			</div>
 		}
 		<div class="day-number">

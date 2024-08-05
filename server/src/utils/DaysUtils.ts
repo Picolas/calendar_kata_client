@@ -39,12 +39,14 @@ export class DaysUtils {
             });
         }
 
-        // number of next month
-        const remainingDays = DaysUtils.CALENDAR_LENGTH - days.length;
-        for (let i = 1; i <= remainingDays; i++) {
+        // add next month days to complete the last week
+        while (days.length % DaysUtils.WEEK_LENGTH !== 0) {
+            const lastDay = days[days.length - 1].date;
+            const nextDay = new Date(lastDay);
+            nextDay.setDate(lastDay.getDate() + 1);
             days.push({
-                id: i.toString(),
-                date: new Date(year, monthCp + 1, i),
+                id: days.length.toString(),
+                date: nextDay,
                 events: [],
                 isLastDay: false,
                 isToday: false

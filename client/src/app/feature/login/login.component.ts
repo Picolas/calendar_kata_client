@@ -3,7 +3,7 @@ import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} fr
 import {Router} from "@angular/router";
 import {AuthService} from "../../services/AuthService/auth.service";
 import {catchError} from 'rxjs/operators';
-import {of} from 'rxjs';
+import {EMPTY} from 'rxjs';
 
 @Component({
 	selector: 'app-login',
@@ -36,9 +36,9 @@ export class LoginComponent {
 	onSubmit() {
 		this.authService.login(this.emailCtrl.value, this.passwordCtrl.value).pipe(
 			catchError(error => {
-				this.errorMessage = 'Login failed. Please check your credentials and try again.';
+				this.errorMessage = 'La connexion a échoué. Veuillez vérifier vos d\'identifiants et réessayer.';
 				console.error('Login error:', error);
-				return of(null);
+				return EMPTY;
 			})
 		).subscribe({
 			next: (response) => {
@@ -47,6 +47,7 @@ export class LoginComponent {
 				}
 			},
 			error: (error) => {
+				this.errorMessage = 'La connexion a échoué. Veuillez vérifier vos d\'identifiants et réessayer.';
 				console.error('Login error:', error);
 			}
 		});
