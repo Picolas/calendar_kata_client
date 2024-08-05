@@ -1,0 +1,15 @@
+<div class="calendar-toolbar">
+	<div class="grouped-button">
+		<button
+			class="calendar-toolbar-button rounded-l-md bg-slate-100 px-3 py-2 text-sm font-medium text-slate-950 hover:bg-slate-200"
+			(click)="onClickPreviousMonth()">Previous
+		</button>
+		<button
+			class="calendar-toolbar-button rounded-r-md bg-slate-100 hover:bg-slate-200 px-3 py-2 text-sm font-medium text-slate-950"
+			(click)="onClickNextMonth()">Next
+		</button>
+	</div>
+	<div
+		class="calendar-toolbar-title font-bold uppercase">{{ month | customFrenchDate: 'MMMM yyyy' }}
+	</div>
+</div>

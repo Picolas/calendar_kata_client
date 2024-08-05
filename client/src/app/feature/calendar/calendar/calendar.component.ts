@@ -3,6 +3,7 @@ import {DayComponent} from "../../../shared/day/day.component";
 import {PartialDay} from "../../../interfaces/Day";
 import {WeeksComponent} from "../../../shared/weeks/weeks.component";
 import {DatePipe} from "@angular/common";
+import {CalendarToolbarComponent} from "../../../shared/calendar-toolbar/calendar-toolbar.component";
 
 @Component({
 	selector: 'app-calendar',
@@ -10,7 +11,8 @@ import {DatePipe} from "@angular/common";
 	imports: [
 		DayComponent,
 		WeeksComponent,
-		DatePipe
+		DatePipe,
+		CalendarToolbarComponent
 	],
 	templateUrl: './calendar.component.html',
 	styleUrl: './calendar.component.css'

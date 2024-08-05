@@ -21,14 +21,6 @@
 	position: relative;
 }
 
-.calendar-toolbar {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	padding: 10px;
-	gap: 10px;
-}
-
 .calendar-header {
 	border-bottom: 5px solid #e2e8f0;
 }
