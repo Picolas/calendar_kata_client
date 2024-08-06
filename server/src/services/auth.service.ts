@@ -4,11 +4,16 @@ import jwt from 'jsonwebtoken';
 import { PartialUser, User } from '../interfaces/User';
 import dotenv from "dotenv";
 import {DecodedUser} from "../interfaces/UserRequest";
+import {inject, injectable} from "inversify";
+import {TYPES} from "../constants/types";
+import {IAuthService} from "../interfaces/IAuthService";
 dotenv.config();
 
-export class AuthService {
-    public prisma = new PrismaClient();
+@injectable()
+export class AuthService implements IAuthService {
     public jwtSecret = process.env.JWT_SECRET!;
+
+    constructor(@inject(TYPES.PrismaClient) private prisma: PrismaClient) {}
 
     public async register(name: string, email: string, password: string): Promise<PartialUser> {
         const user = await this.prisma.user.findUnique({ where: { email } });

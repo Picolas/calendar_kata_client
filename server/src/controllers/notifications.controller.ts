@@ -3,22 +3,16 @@ import { Response } from "express";
 import { UserRequest } from "../interfaces/UserRequest";
 import {PartialNotification} from "../interfaces/Notification";
 import {Server} from "socket.io";
+import {TYPES} from "../constants/types";
+import {inject, injectable} from "inversify";
+import {INotificationsService} from "../interfaces/INotificationsService";
 
+@injectable()
 export class NotificationsController {
-    private notificationsService = new NotificationsService();
-    private static instance: NotificationsController;
-    private io: Server;
-
-    private constructor(io: Server) {
-        this.io = io;
-    }
-
-    public static getInstance(io: Server): NotificationsController {
-        if (!NotificationsController.instance) {
-            NotificationsController.instance = new NotificationsController(io);
-        }
-        return NotificationsController.instance;
-    }
+    constructor(
+        @inject(TYPES.NotificationsService) private notificationsService: INotificationsService,
+        @inject(TYPES.SocketIO) private io: Server
+    ) {}
 
     public sendNotification(userId: number, notification: PartialNotification): void {
         const jsonNotification = JSON.stringify(notification);

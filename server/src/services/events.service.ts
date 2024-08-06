@@ -1,10 +1,29 @@
+import {inject, injectable} from 'inversify';
 import { PrismaClient } from '@prisma/client';
-import {Event, PartialEvent} from '../interfaces/Event';
-import {DaysUtils} from "../utils/DaysUtils";
-import {PartialUser} from "../interfaces/User";
+import { IEventsService } from '../interfaces/IEventsService';
+import { Event, PartialEvent } from '../interfaces/Event';
+import { User } from '../interfaces/User';
+import {TYPES} from "../constants/types";
 
-export class EventsService {
-    private prisma = new PrismaClient();
+@injectable()
+export class EventsService implements IEventsService {
+    constructor(@inject(TYPES.PrismaClient) private prisma: PrismaClient) {}
+
+    private eventDetails = {
+        creator: true,
+        inUser: {
+            include: {
+                user: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true,
+                        createdAt: true,
+                    }
+                }
+            }
+        }
+    };
 
     public async findAllEvents(): Promise<PartialEvent[]> {
         return this.prisma.event.findMany({
@@ -50,232 +69,115 @@ export class EventsService {
         };
     }
 
-    public async updateEvent(eventId: number, data: PartialEvent): Promise<PartialEvent> {
-        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
-        if (!event) {
-            throw new Error('Event not found');
-        }
-        const { id, creator,createdAt, inUser, showHeader, ...updateData } = data; // Exclude `id` and `createdAt` from the update data
-        const updatedEvent = await this.prisma.event.update({
+    public async updateEvent(eventId: number, data: Partial<Event>): Promise<PartialEvent> {
+        const event = await this.prisma.event.update({
             where: { id: eventId },
             data: {
-                ...updateData,
-                //creator: data.creator ? { connect: { id: data.creator.id } } : undefined,
-                /*
+                title: data.title,
+                description: data.description,
+                startDate: data.startDate ? new Date(data.startDate).toISOString() : undefined,
+                endDate: data.endDate ? new Date(data.endDate).toISOString() : undefined,
                 inUser: data.inUser ? {
+                    deleteMany: {},
                     create: data.inUser.map(user => ({ user: { connect: { id: user.id } } })),
                 } : undefined,
-                 */
-            },
-            include: {
-                creator: {
-                    select: this.userDetails
-                },
-                /*
-                inUser: {
-                    include: {
-                        user: true,
-                    },
-                },
-                 */
-            },
-        });
-        return {
-            ...updatedEvent,
-            //inUser: updatedEvent.inUser.map(userEvent => userEvent.user),
-        };
-    }
-
-    public async deleteEvent(eventId: number, userId: number): Promise<PartialEvent> {
-        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
-        if (!event) {
-            throw new Error('Event not found');
-        }
-
-        await this.prisma.usersOnEvents.deleteMany({ where: { eventId } });
-
-        const deletedEvent = await this.prisma.event.delete({ where: { id: eventId } });
-        return {
-            ...deletedEvent,
-        };
-    }
-
-    public async getUserEventsOfDay(userId: number, date: string): Promise<PartialEvent[]> {
-        const start = DaysUtils.getStartOfDay(new Date(date));
-        const end = DaysUtils.getEndOfDay(new Date(date));
-
-        const events = await this.prisma.event.findMany({
-            where: {
-                creatorId: userId,
-                startDate: {
-                    gte: start,
-                },
-                endDate: {
-                    lte: end,
-                },
             },
             include: this.eventDetails
         });
-
-        return events.map(event => ({
+        return {
             ...event,
             inUser: event.inUser.map(userEvent => userEvent.user),
-        }));
+        };
+    }
+
+    public async deleteEvent(eventId: number, userId: number): Promise<boolean> {
+        const event = await this.prisma.event.findUnique({
+            where: { id: eventId },
+            include: { creator: true }
+        });
+
+        if (!event || event.creator.id !== userId) {
+            return false;
+        }
+
+        await this.prisma.event.delete({ where: { id: eventId } });
+        return true;
+    }
+
+    public async getUsersForEvent(eventId: number): Promise<User[]> {
+        const event = await this.prisma.event.findUnique({
+            where: { id: eventId },
+            include: { inUser: { include: { user: true } } }
+        });
+        return event ? event.inUser.map(userEvent => userEvent.user) : [];
+    }
+
+    public async getEventCreator(eventId: number): Promise<User> {
+        const event = await this.prisma.event.findUnique({
+            where: { id: eventId },
+            include: { creator: true }
+        });
+        if (!event) {
+            throw new Error('Event not found');
+        }
+        return event.creator;
     }
 
     public async findEventsByPeriod(userId: number, startDate: Date, endDate: Date): Promise<PartialEvent[]> {
-        const events = await this.prisma.event.findMany({
+        return this.prisma.event.findMany({
             where: {
-                creatorId: userId,
                 OR: [
-                    {
-                        startDate: {
-                            gte: startDate,
-                            lte: endDate,
-                        },
-                    },
-                    {
-                        endDate: {
-                            gte: startDate,
-                            lte: endDate,
-                        },
-                    },
+                    { creatorId: userId },
+                    { inUser: { some: { userId: userId } } }
                 ],
+                AND: [
+                    { startDate: { gte: startDate } },
+                    { endDate: { lte: endDate } }
+                ]
             },
             include: this.eventDetails
-        });
-
-        // also add events where the user is in the inUser relation
-        const userEvents = await this.prisma.usersOnEvents.findMany({
-            where: {
-                userId,
-            },
-            include: {
-                event: {
-                    include: {
-                        creator: {
-                            select: this.userDetails
-                        },
-                        inUser: {
-                            select: {
-                                user: {
-                                    select: this.userDetails,
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        });
-
-        const userEventsData = userEvents.map(userEvent => userEvent.event);
-        const allEvents = [...events, ...userEventsData];
-
-        return allEvents.map(event => ({
+        }).then(events => events.map(event => ({
             ...event,
             inUser: event.inUser.map(userEvent => userEvent.user),
-        }));
+        })));
     }
 
-    public async getUsersForEvent(eventId: number): Promise<PartialUser[]> {
-        const users = await this.prisma.usersOnEvents.findMany({
+    public async getUserEventsOfDay(userId: number, date: string): Promise<PartialEvent[]> {
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return this.prisma.event.findMany({
             where: {
-                eventId,
+                OR: [
+                    { creatorId: userId },
+                    { inUser: { some: { userId: userId } } }
+                ],
+                AND: [
+                    { startDate: { gte: startOfDay } },
+                    { endDate: { lte: endOfDay } }
+                ]
             },
-            include: {
-                user: {
-                    select: this.userDetails
-                },
-            },
-        });
-
-        return users.map(userEvent => ({
-            id: userEvent.user.id,
-            name: userEvent.user.name,
-            email: userEvent.user.email,
-            createdAt: userEvent.user.createdAt,
-        }));
-    }
-
-    public async checkUserCreatedEvent(eventId: number, userId: number): Promise<boolean> {
-        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
-        if (!event) {
-            throw new Error('Event not found');
-        }
-        return event.creatorId === userId;
-    }
-
-    public async getEventCreator(eventId: number): Promise<PartialUser> {
-        const event = await this.prisma.event.findUnique({ where: { id: eventId } });
-        if (!event) {
-            throw new Error('Event not found');
-        }
-
-        const creator = await this.prisma.user.findUnique({ where: { id: event.creatorId } });
-        if (!creator) {
-            throw new Error('Event creator not found');
-        }
-
-        return {
-            id: creator.id,
-            name: creator.name,
-            email: creator.email,
-            createdAt: creator.createdAt,
-        };
+            include: this.eventDetails
+        }).then(events => events.map(event => ({
+            ...event,
+            inUser: event.inUser.map(userEvent => userEvent.user),
+        })));
     }
 
     public async getUserEvents(userId: number): Promise<PartialEvent[]> {
-        const events = await this.prisma.event.findMany({
+        return this.prisma.event.findMany({
             where: {
                 OR: [
-                    {
-                        creatorId: userId,
-                    },
-                    {
-                        inUser: {
-                            some: {
-                                userId,
-                            },
-                        },
-                    },
-                ],
+                    { creatorId: userId },
+                    { inUser: { some: { userId: userId } } }
+                ]
             },
-            include: {
-                creator: {
-                    select: this.userDetails
-                },
-                inUser: {
-                    include: {
-                        user: {
-                            select: this.userDetails
-                        },
-                    },
-                },
-            },
-        });
-        return events.map(event => ({
+            include: this.eventDetails
+        }).then(events => events.map(event => ({
             ...event,
             inUser: event.inUser.map(userEvent => userEvent.user),
-        }));
-    }
-
-    private userDetails = {
-            id: true,
-            name: true,
-            email: true,
-            createdAt: true,
-    }
-
-    private eventDetails = {
-        creator: {
-            select: this.userDetails
-        },
-        inUser: {
-            include: {
-                user: {
-                    select: this.userDetails
-                }
-            }
-        }
+        })));
     }
 }

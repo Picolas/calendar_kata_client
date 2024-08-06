@@ -1,8 +1,12 @@
 import {PrismaClient} from "@prisma/client";
 import {PartialNotification} from "../interfaces/Notification";
+import {inject, injectable} from "inversify";
+import {INotificationsService} from "../interfaces/INotificationsService";
+import {TYPES} from "../constants/types";
 
-export class NotificationsService {
-    private prisma = new PrismaClient();
+@injectable()
+export class NotificationsService implements INotificationsService {
+    constructor(@inject(TYPES.PrismaClient) private prisma: PrismaClient) {}
 
     public async createNotification(userId: number, content: string): Promise<PartialNotification> {
         return this.prisma.notification.create({

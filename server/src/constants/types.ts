@@ -1,0 +1,16 @@
+export const TYPES = {
+    EventsService: Symbol.for('EventsService'),
+    EventsController: Symbol.for('EventsController'),
+    NotificationsService: Symbol.for('NotificationsService'),
+    NotificationsController: Symbol.for('NotificationsController'),
+    PrismaClient: Symbol.for('PrismaClient'),
+    DaysController: Symbol.for('DaysController'),
+    AuthController: Symbol.for('AuthController'),
+    AuthService: Symbol.for('AuthService'),
+    UsersController: Symbol.for('UsersController'),
+    UsersService: Symbol.for('UsersService'),
+    SocketIO: Symbol.for('SocketIO'),
+    SocketController: Symbol.for('SocketController'),
+    HttpServer: Symbol.for('HttpServer'),
+    CorsOrigins: Symbol.for('CorsOrigins'),
+};
