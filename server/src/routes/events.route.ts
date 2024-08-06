@@ -1,11 +1,21 @@
 import { Router } from 'express';
 import { EventsController } from '../controllers/events.controller';
 import { authMiddleware } from '../middlewares/auth.middleware';
-import { Server as SocketIOServer } from 'socket.io';
+import {Container} from "inversify";
+import {TYPES} from "../constants/types";
+import {validate} from "../middlewares/validation.middleware";
+import {
+    createEventSchema,
+    deleteEventSchema,
+    getEventByIdSchema, getEventsOnIntervalSchema,
+    getUserEventsOfDaySchema,
+    updateEventSchema
+} from "../schemas/event.schema";
 
-const eventsRoute = (io: SocketIOServer) => {
-    const router = Router();
-    const eventsController = new EventsController(io);
+export const configureEventsRoutes = (router: Router, container: Container) => {
+    const eventsController = container.get<EventsController>(TYPES.EventsController);
+
+    // TODO: Add validation : validate(getEventByIdSchema) after authMiddleware etc
 
     router.get('/', authMiddleware, eventsController.getAllEvents);
     router.get('/events', authMiddleware, eventsController.getUserEvents);
@@ -18,5 +28,3 @@ const eventsRoute = (io: SocketIOServer) => {
 
     return router;
 };
-
-export default eventsRoute;

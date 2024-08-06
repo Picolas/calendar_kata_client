@@ -3,11 +3,15 @@ import { DaysUtils } from '../utils/DaysUtils';
 import { UsersService } from '../services/users.service';
 import {UserRequest} from "../interfaces/UserRequest";
 import {EventsService} from "../services/events.service";
+import {inject, injectable} from "inversify";
+import {TYPES} from "../constants/types";
 
-
+@injectable()
 export class DaysController {
-    private usersService = new UsersService();
-    private eventsService = new EventsService();
+
+    constructor(@inject(TYPES.UsersService) private usersService: UsersService,
+                @inject(TYPES.EventsService) private eventsService: EventsService) {
+    }
 
     public getDays = async (req: UserRequest, res: Response): Promise<void> => {
         try {
@@ -21,7 +25,7 @@ export class DaysController {
                 return;
             }
 
-            const user = await this.usersService.findUserById(userId!);
+            const user = await this.usersService.getUserById(userId!);
             if (!user) {
                 res.status(404).json({ message: 'User not found' });
                 return;

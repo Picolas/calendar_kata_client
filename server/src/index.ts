@@ -1,35 +1,29 @@
+import 'reflect-metadata';
 import express from 'express';
-import dotenv from "dotenv";
-import cors from "cors";
-import { Server } from 'socket.io';
-import * as http from "node:http";
-import configureRoutes from "./routes/configure.routes";
-import {SocketController} from "./controllers/socket.controller";
-
-
-dotenv.config();
+import cors from 'cors';
+import { createServer } from 'http';
+import { configureContainer } from './utils/DependencyInjection';
+import { errorHandler } from './middlewares/error.middleware';
+import configureRoutes from './routes/configure.routes';
+import { appConfig } from './config/app.config';
+import { TYPES } from './constants/types';
+import { SocketController } from './controllers/socket.controller';
 
 const app = express();
-const port = process.env.PORT || 3000;
-const api = '/api';
-const origins = process.env.CLIENTS_URL!.split(',');
-console.log(origins)
+const httpServer = createServer(app);
 
-app.use(cors({
-    origin: '*',
-    credentials: true
-}));
+app.use(cors(appConfig.cors));
 app.use(express.json());
-app.get('/', (req, res) => {
-    res.send('Hello, TypeScript with Express!');
-});
 
-const server = http.createServer(app);
-const socketController = new SocketController(server, origins);
+const container = configureContainer(httpServer);
+
+const socketController = container.get<SocketController>(TYPES.SocketController);
 const io = socketController.getIO();
 
-configureRoutes(app, io);
+configureRoutes(app, container);
 
-server.listen(port, () => {
-    console.log(`Server is running on http://localhost:${port}`);
+app.use(errorHandler);
+
+httpServer.listen(appConfig.port, () => {
+    console.log(`Server is running on http://localhost:${appConfig.port}`);
 });

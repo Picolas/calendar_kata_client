@@ -1,16 +1,28 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { PartialUser, User } from '../interfaces/User';
+import {inject, injectable} from "inversify";
+import {TYPES} from "../constants/types";
+import {IUsersService} from "../interfaces/IUsersService";
 
-export class UsersService {
-    public prisma = new PrismaClient();
+@injectable()
+export class UsersService implements IUsersService {
+    constructor(@inject(TYPES.PrismaClient) private prisma: PrismaClient) {}
 
-    public async findAllUsers(): Promise<PartialUser[]> {
+    public async getAllUsers(): Promise<PartialUser[]> {
         const users = await this.prisma.user.findMany();
         return users.map(this.withoutPassword);
     }
 
-    public async findUserById(userId: number): Promise<PartialUser> {
+    public async getUserByEmail(email: string): Promise<PartialUser | null> {
+        const user = await this.prisma.user.findUnique({ where: { email } });
+        if (!user) {
+            return null;
+        }
+        return this.withoutPassword(user);
+    }
+
+    public async getUserById(userId: number): Promise<PartialUser> {
         const user = await this.prisma.user.findUnique({ where: { id: userId } });
         if (!user) {
             throw new Error('User not found');
@@ -54,6 +66,22 @@ export class UsersService {
         }
 
         return this.withoutPassword(user);
+    }
+
+    public async searchUsers(query: string): Promise<PartialUser[]> {
+        return this.prisma.user.findMany({
+            where: {
+                OR: [
+                    { email: { contains: query, mode: 'insensitive' } },
+                    { name: { contains: query, mode: 'insensitive' } }
+                ]
+            },
+            select: {
+                id: true,
+                email: true,
+                name: true
+            }
+        });
     }
 
     private withoutPassword({ password: _, ...rest }: User): PartialUser {
