@@ -1,7 +1,6 @@
 import {Router} from "express";
 import {authMiddleware} from "../middlewares/auth.middleware";
 import {NotificationsController} from "../controllers/notifications.controller";
-import {Server as SocketIOServer} from "socket.io";
 import {Container} from "inversify";
 import {TYPES} from "../constants/types";
 

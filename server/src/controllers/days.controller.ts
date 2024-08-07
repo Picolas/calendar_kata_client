@@ -1,8 +1,5 @@
 import { Response } from 'express';
-import { DaysUtils } from '../utils/DaysUtils';
-import { UsersService } from '../services/users.service';
 import {UserRequest} from "../interfaces/UserRequest";
-import {EventsService} from "../services/events.service";
 import {inject, injectable} from "inversify";
 import {TYPES} from "../constants/types";
 import {IDaysService} from "../interfaces/Service/IDaysService";

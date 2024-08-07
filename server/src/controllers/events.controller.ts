@@ -1,10 +1,8 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
 import { IEventsService } from '../interfaces/Service/IEventsService';
-import { INotificationsService } from '../interfaces/Service/INotificationsService';
 import { TYPES } from '../constants/types';
 import { UserRequest } from '../interfaces/UserRequest';
-import {IUsersService} from "../interfaces/Service/IUsersService";
 import {CreateEventDto} from "../dtos/CreateEventDto";
 import {validate} from "class-validator";
 import {UpdateEventDto} from "../dtos/UpdateEventDto";
