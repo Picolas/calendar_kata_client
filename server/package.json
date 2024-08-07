@@ -4,7 +4,11 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "migrate": "prisma migrate dev",
+    "postmigrate": "npx @snaplet/seed sync",
+    "migrateprod": "prisma migrate deploy --schema=./src/prisma/schema.prisma",
+    "start:migrate": "prisma migrate deploy && npm run start"
   },
   "keywords": [],
   "author": "",
@@ -23,6 +27,8 @@
     "socket.io": "^4.7.5"
   },
   "devDependencies": {
+    "@snaplet/copycat": "^5.0.0",
+    "@snaplet/seed": "^0.98.0",
     "@types/bcryptjs": "^2.4.6",
     "@types/cors": "^2.8.17",
     "@types/express": "^4.17.21",
@@ -31,5 +37,11 @@
     "prisma": "^5.17.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4"
+  },
+  "@snaplet/seed": {
+    "config": "prisma/seed/seed.config.ts"
+  },
+  "prisma": {
+    "seed": "npx tsx prisma/seed/seed.ts"
   }
 }

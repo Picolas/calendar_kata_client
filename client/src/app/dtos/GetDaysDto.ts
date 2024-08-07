@@ -3,7 +3,7 @@ export class GetDaysDto {
 	userId: number;
 
 	constructor(month: Date, userId: number) {
-		this.month = month.toISOString();
+		this.month = new Date(Date.UTC(month.getFullYear(), month.getMonth(), 1)).toISOString();
 		this.userId = userId;
 	}
 }
