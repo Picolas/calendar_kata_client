@@ -2,9 +2,10 @@ import { Server } from 'socket.io';
 import * as http from 'node:http';
 import { injectable, inject } from "inversify";
 import { TYPES } from "../constants/types";
+import {ISocketService} from "../interfaces/Service/ISocketService";
 
 @injectable()
-export class SocketController {
+export class SocketService implements ISocketService{
     private io: Server;
 
     constructor(
@@ -14,7 +15,9 @@ export class SocketController {
         this.io = new Server(this.server, {
             cors: {
                 origin: this.origins,
-                methods: ["GET", "POST"]
+                methods: ["GET", "POST"],
+                credentials: true,
+                allowedHeaders: ["Content-Type", "Authorization"]
             }
         });
 
@@ -38,5 +41,10 @@ export class SocketController {
 
     public getIO(): Server {
         return this.io;
+    }
+
+    public emitToUser(userId: number, type: string, data: Object): void {
+        const jsonData = JSON.stringify(data);
+        this.io.to(`user_${userId}`).emit(type, jsonData);
     }
 }

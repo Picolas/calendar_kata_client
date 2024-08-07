@@ -1,150 +1,101 @@
-import {PartialEvent} from '../interfaces/Event';
 import {Day} from "../interfaces/Day";
+import {EventDto} from "../dtos/EventDto";
 
 export class DaysUtils {
 
     static WEEK_LENGTH = 7;
-    static CALENDAR_LENGTH = 35;
 
-    static getDays(month: Date, events: PartialEvent[]): Day[] {
+    static getDays(month: Date, events: EventDto[]): Day[] {
         const year = month.getFullYear();
         const monthCp = month.getMonth();
-        const firstDayOfMonth = new Date(year, monthCp, 1).getDay();
-        const numDays = new Date(year, monthCp + 1, 0).getDate();
-        const numDaysPrevMonth = new Date(year, monthCp, 0).getDate();
+        const firstDayOfMonth = new Date(Date.UTC(year, monthCp, 1));
+        const lastDayOfMonth = new Date(Date.UTC(year, monthCp + 1, 0));
+        const numDays = lastDayOfMonth.getDate();
+        const daysFromPrevMonth = (firstDayOfMonth.getUTCDay() + 6) % 7; // start monday
+
         const days: Day[] = [];
+        const today = new Date();
+        const todayString = today.toDateString();
 
-        // number of previous month
-        const daysFromPrevMonth = (firstDayOfMonth + 6) % 7; // start monday
-
-        // add previous month days
+        // add days from previous month
         for (let i = daysFromPrevMonth - 1; i >= 0; i--) {
-            days.push({
-                id: (numDaysPrevMonth - i).toString(),
-                date: new Date(year, monthCp - 1, numDaysPrevMonth - i),
-                events: [],
-                isLastDay: false,
-                isToday: false
-            });
+            const date = new Date(Date.UTC(year, monthCp - 1, new Date(Date.UTC(year, monthCp, 0)).getDate() - i));
+            days.push(DaysUtils.createDay(date, false, todayString));
         }
 
-        // current month days
+        // add days from current month
         for (let i = 1; i <= numDays; i++) {
-            days.push({
-                id: i.toString(),
-                date: new Date(year, monthCp, i),
-                events: [],
-                isLastDay: false,
-                isToday: new Date().toDateString() === new Date(year, monthCp, i).toDateString()
-            });
+            const date = new Date(Date.UTC(year, monthCp, i));
+            days.push(DaysUtils.createDay(date, true, todayString));
         }
 
-        // add next month days to complete the last week
+        // add days from next month
         while (days.length % DaysUtils.WEEK_LENGTH !== 0) {
-            const lastDay = days[days.length - 1].date;
-            const nextDay = new Date(lastDay);
-            nextDay.setDate(lastDay.getDate() + 1);
-            days.push({
-                id: days.length.toString(),
-                date: nextDay,
-                events: [],
-                isLastDay: false,
-                isToday: false
-            });
+            const date = new Date(Date.UTC(year, monthCp + 1, days.length - numDays - daysFromPrevMonth + 1));
+            days.push(DaysUtils.createDay(date, false, todayString));
         }
 
         // add events to days
-        for (const event of events) {
-            const eventStartDate = new Date(event.startDate!);
-            const eventEndDate = new Date(event.endDate!);
-
-            const normalizedEventStartDate = new Date(eventStartDate.getFullYear(), eventStartDate.getMonth(), eventStartDate.getDate());
-            const normalizedEventEndDate = new Date(eventEndDate.getFullYear(), eventEndDate.getMonth(), eventEndDate.getDate());
-
-            for (const day of days) {
-                const normalizedDayDate = new Date(day.date.getFullYear(), day.date.getMonth(), day.date.getDate());
-                if (normalizedDayDate >= normalizedEventStartDate && normalizedDayDate <= normalizedEventEndDate) {
-                    day.events.push({ ...event, showHeader: false });
+        const eventMap = new Map<string, EventDto[]>();
+        events.forEach(event => {
+            const start = new Date(event.startDate!);
+            const end = new Date(event.endDate!);
+            for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+                // date key
+                const key = d.toISOString().split('T')[0];
+                if (!eventMap.has(key)) {
+                    eventMap.set(key, []);
                 }
-
-                // sort events by date
-                day.events.sort((a, b) => {
-                    const dateA = new Date(a.startDate!);
-                    const dateB = new Date(b.startDate!);
-                    if (dateA < dateB) {
-                        return -1;
-                    } else if (dateA > dateB) {
-                        return 1;
-                    } else {
-                        return 0;
-                    }
-                });
+                eventMap.get(key)!.push({ ...event });
             }
-        }
+        });
 
-        // every 7 days = last day of week in calendar
-        for (let i = DaysUtils.WEEK_LENGTH - 1; i < days.length; i += DaysUtils.WEEK_LENGTH) {
-            days[i].isLastDay = true;
-        }
-
-        // group days into weeks and set showHeader for events
-        for (let i = 0; i < days.length; i += DaysUtils.WEEK_LENGTH) {
-            const week = days.slice(i, i + DaysUtils.WEEK_LENGTH);
-            const eventMap = new Map<string, boolean>();
-
-            for (const day of week) {
-                for (const event of day.events) {
-                    if (event.title && !eventMap.has(event.title)) {
-                        event.showHeader = true;
-                        eventMap.set(event.title, true);
-                    }
-                }
+        // sort events by start date
+        days.forEach(day => {
+            const key = day.date.toISOString().split('T')[0];
+            if (eventMap.has(key)) {
+                day.events = eventMap.get(key)!.sort((a, b) =>
+                    new Date(a.startDate!).getTime() - new Date(b.startDate!).getTime()
+                );
             }
-        }
-
-        // set showHeader for multiple day events
-        for (let i = 0; i < days.length; i += 7) {
-            const week = days.slice(i, i + 7);
-            const eventMap = new Map<string, boolean>();
-
-            for (const day of week) {
-                for (const event of day.events) {
-                    if (event.title) {
-                        if (!eventMap.has(event.title)) {
-                            event.showHeader = true;
-                            eventMap.set(event.title, true);
-                        } else {
-                            event.showHeader = false;
-                        }
-                    }
-                }
-            }
-        }
+        });
 
         return days;
     }
 
+    static createDay(date: Date, isCurrentMonth: boolean, todayString: string): Day {
+        return {
+            id: date.getDate().toString(),
+            date,
+            events: [],
+            isLastDay: false,
+            isToday: date.toDateString() === todayString,
+        }
+    }
+
+
     static getPeriodDays(month: Date): { startDate: Date, endDate: Date } {
         const year = month.getFullYear();
-        const monthCp = month.getMonth();
-        const firstDayOfMonth = new Date(year, monthCp, 1).getDay();
-        const numDays = new Date(year, monthCp + 1, 0).getDate();
-        const daysFromPrevMonth = (firstDayOfMonth + 6) % 7;
+        const monthIndex = month.getMonth();
 
-        const startDate = new Date(year, monthCp - 1, numDays - daysFromPrevMonth + 1);
-        const endDate = new Date(year, monthCp, numDays + (35 - (numDays + daysFromPrevMonth)));
+        // first day of month
+        const firstDayOfMonth = new Date(Date.UTC(year, monthIndex, 1));
 
-        return {startDate, endDate};
+        // last day of month
+        const lastDayOfMonth = new Date(Date.UTC(year, monthIndex + 1, 0));
+
+        // calculate first day of week
+        const firstDayOfWeek = (firstDayOfMonth.getUTCDay() + 6) % 7;
+
+        // calculate the last day of week
+        const lastDayOfWeek = (lastDayOfMonth.getUTCDay() + 6) % 7;
+
+        // get complete week at start
+        const startDate = new Date(Date.UTC(year, monthIndex, 1 - firstDayOfWeek));
+
+        // get complete week at end
+        const endDate = new Date(Date.UTC(year, monthIndex, lastDayOfMonth.getUTCDate() + (6 - lastDayOfWeek)));
+
+        return { startDate, endDate };
     }
-
-    static getStartOfDay(date: Date): Date {
-        date.setHours(0, 0, 0, 0);
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    }
-
-    static getEndOfDay(date: Date): Date {
-        date.setHours(23, 59, 59, 999);
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate());
-    }
-
 }

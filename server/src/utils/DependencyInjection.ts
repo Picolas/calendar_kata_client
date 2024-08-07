@@ -6,18 +6,33 @@ import { EventsController } from '../controllers/events.controller';
 import { NotificationsController } from '../controllers/notifications.controller';
 import { AuthController } from '../controllers/auth.controller';
 import { DaysController } from '../controllers/days.controller';
-import { IEventsService } from '../interfaces/IEventsService';
-import { INotificationsService } from '../interfaces/INotificationsService';
-import { IAuthService } from '../interfaces/IAuthService';
+import { IEventsService } from '../interfaces/Service/IEventsService';
+import { INotificationsService } from '../interfaces/Service/INotificationsService';
+import { IAuthService } from '../interfaces/Service/IAuthService';
 import { TYPES } from '../constants/types';
 import * as http from 'http';
-import { SocketController } from '../controllers/socket.controller';
 import { appConfig } from '../config/app.config';
-import {IUsersService} from "../interfaces/IUsersService";
+import {IUsersService} from "../interfaces/Service/IUsersService";
 import {UsersService} from "../services/users.service";
 import {UsersController} from "../controllers/users.controller";
 import {PrismaClient} from "@prisma/client";
-import {Server} from "socket.io";
+import {IUsersRepository} from "../interfaces/Repository/IUsersRepository";
+import {IEventsRepository} from "../interfaces/Repository/IEventsRepository";
+import {EventsRepository} from "../repository/events.repository";
+import {INotificationsRepository} from "../interfaces/Repository/INotificationsRepository";
+import {NotificationsRepository} from "../repository/notifications.repository";
+import {IDaysService} from "../interfaces/Service/IDaysService";
+import {DaysService} from "../services/days.service";
+import {IAuthRepository} from "../interfaces/Repository/IAuthRepository";
+import {AuthRepository} from "../repository/auth.repository";
+import {IEventsController} from "../interfaces/Controller/IEventsController";
+import {IAuthController} from "../interfaces/Controller/IAuthController";
+import {IDaysController} from "../interfaces/Controller/IDaysController";
+import {IUsersController} from "../interfaces/Controller/IUsersController";
+import {UsersRepository} from "../repository/users.repository";
+import {ISocketService} from "../interfaces/Service/ISocketService";
+import {SocketService} from "../services/socket.service";
+import {INotificationsController} from "../interfaces/Controller/INotificationsController";
 
 export const configureContainer = (httpServer: http.Server) => {
     const container = new Container();
@@ -27,22 +42,25 @@ export const configureContainer = (httpServer: http.Server) => {
     container.bind<INotificationsService>(TYPES.NotificationsService).to(NotificationsService);
     container.bind<IAuthService>(TYPES.AuthService).to(AuthService);
     container.bind<IUsersService>(TYPES.UsersService).to(UsersService);
+    container.bind<IDaysService>(TYPES.DaysService).to(DaysService);
 
     // Controllers
-    container.bind<EventsController>(TYPES.EventsController).to(EventsController);
-    container.bind<NotificationsController>(TYPES.NotificationsController).to(NotificationsController).inSingletonScope();
-    container.bind<AuthController>(TYPES.AuthController).to(AuthController);
-    container.bind<DaysController>(TYPES.DaysController).to(DaysController);
-    container.bind<UsersController>(TYPES.UsersController).to(UsersController);
+    container.bind<IEventsController>(TYPES.EventsController).to(EventsController);
+    container.bind<INotificationsController>(TYPES.NotificationsController).to(NotificationsController).inSingletonScope();
+    container.bind<IAuthController>(TYPES.AuthController).to(AuthController);
+    container.bind<IDaysController>(TYPES.DaysController).to(DaysController);
+    container.bind<IUsersController>(TYPES.UsersController).to(UsersController);
+
+    // Repositories
+    container.bind<IUsersRepository>(TYPES.UsersRepository).to(UsersRepository);
+    container.bind<IEventsRepository>(TYPES.EventsRepository).to(EventsRepository);
+    container.bind<INotificationsRepository>(TYPES.NotificationsRepository).to(NotificationsRepository);
+    container.bind<IAuthRepository>(TYPES.AuthRepository).to(AuthRepository);
 
     // Socket.IO
     container.bind<http.Server>(TYPES.HttpServer).toConstantValue(httpServer);
     container.bind<string[]>(TYPES.CorsOrigins).toConstantValue(Array.isArray(appConfig.cors.origin) ? appConfig.cors.origin : [appConfig.cors.origin]);
-    container.bind<SocketController>(TYPES.SocketController).to(SocketController).inSingletonScope();
-    container.bind<Server>(TYPES.SocketIO).toDynamicValue(() => {
-        const socketController = container.get<SocketController>(TYPES.SocketController);
-        return socketController.getIO();
-    });
+    container.bind<ISocketService>(TYPES.SocketService).to(SocketService).inSingletonScope();
 
     // Prisma
     container.bind<PrismaClient>(TYPES.PrismaClient).toConstantValue(new PrismaClient());

@@ -1,80 +1,66 @@
 import { Request, Response } from 'express';
-import { UsersService } from '../services/users.service';
 import {inject, injectable} from "inversify";
 import {TYPES} from "../constants/types";
+import {IUsersController} from "../interfaces/Controller/IUsersController";
+import {IUsersService} from "../interfaces/Service/IUsersService";
+import {UpdateUserDto} from "../dtos/UpdateUserDto";
+import {validate} from "class-validator";
 
 @injectable()
-export class UsersController {
-
-    constructor(@inject(TYPES.UsersService) private usersService: UsersService) {
-    }
+export class UsersController implements IUsersController {
+    constructor(@inject(TYPES.UsersService) private usersService: IUsersService) {}
 
     public getAllUsers = async (req: Request, res: Response): Promise<void> => {
         try {
             const users = await this.usersService.getAllUsers();
             res.status(200).json(users);
         } catch (error) {
-            const err = error as Error;
-            res.status(500).json({ message: err.message });
+            res.status(500).json({ message: (error as Error).message });
         }
     };
 
     public getUserById = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = parseInt(req.params.id, 10);
-            if (!userId) {
-                res.status(400).json({ message: 'User ID is required' });
-                return;
-            }
-
             const user = await this.usersService.getUserById(userId);
-            user ? res.status(200).json(user) : res.status(404).json({ message: 'User not found' });
+            res.status(200).json(user);
         } catch (error) {
-            const err = error as Error;
-            res.status(500).json({ message: err.message });
+            res.status(500).json({ message: (error as Error).message });
         }
     };
 
     public updateUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = parseInt(req.params.id, 10);
-            if (!userId) {
-                res.status(400).json({ message: 'User ID is required' });
+            const updateUserDto = new UpdateUserDto();
+            Object.assign(updateUserDto, req.body);
+
+            const errors = await validate(updateUserDto);
+            if (errors.length > 0) {
+                res.status(400).json({ errors: errors.map(error => Object.values(error.constraints!)) });
                 return;
             }
 
-            const updatedData = req.body;
-            const updatedUser = await this.usersService.updateUser(userId, updatedData);
+            const updatedUser = await this.usersService.updateUser(userId, updateUserDto);
             res.status(200).json(updatedUser);
         } catch (error) {
-            const err = error as Error;
-            res.status(500).json({ message: err.message });
+            res.status(500).json({ message: (error as Error).message });
         }
     };
 
     public deleteUser = async (req: Request, res: Response): Promise<void> => {
         try {
             const userId = parseInt(req.params.id, 10);
-            if (!userId) {
-                res.status(400).json({ message: 'User ID is required' });
-                return;
-            }
-
             await this.usersService.deleteUser(userId);
             res.status(204).send();
         } catch (error) {
-            const err = error as Error;
-            res.status(500).json({ message: err.message });
+            res.status(500).json({ message: (error as Error).message });
         }
     };
 
     public searchUsers = async (req: Request, res: Response): Promise<void> => {
         try {
             const query = req.query.q as string;
-            if (!query) {
-                res.status(400).json({ message: 'Query parameter is required' });
-                return;
-            }
             const users = await this.usersService.searchUsers(query);
             res.status(200).json(users);
         } catch (error) {

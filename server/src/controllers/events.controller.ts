@@ -1,17 +1,19 @@
 import { Request, Response } from 'express';
 import { inject, injectable } from 'inversify';
-import { IEventsService } from '../interfaces/IEventsService';
-import { INotificationsService } from '../interfaces/INotificationsService';
+import { IEventsService } from '../interfaces/Service/IEventsService';
+import { INotificationsService } from '../interfaces/Service/INotificationsService';
 import { TYPES } from '../constants/types';
 import { UserRequest } from '../interfaces/UserRequest';
-import {IUsersService} from "../interfaces/IUsersService";
+import {IUsersService} from "../interfaces/Service/IUsersService";
+import {CreateEventDto} from "../dtos/CreateEventDto";
+import {validate} from "class-validator";
+import {UpdateEventDto} from "../dtos/UpdateEventDto";
+import {IEventsController} from "../interfaces/Controller/IEventsController";
 
 @injectable()
-export class EventsController {
+export class EventsController implements IEventsController {
     constructor(
-        @inject(TYPES.EventsService) private eventsService: IEventsService,
-        @inject(TYPES.NotificationsService) private notificationsService: INotificationsService,
-        @inject(TYPES.UsersService) private usersService: IUsersService
+        @inject(TYPES.EventsService) private eventsService: IEventsService
     ) {}
 
     public getAllEvents = async (req: Request, res: Response): Promise<void> => {
@@ -35,26 +37,17 @@ export class EventsController {
 
     public createEvent = async (req: UserRequest, res: Response): Promise<void> => {
         try {
-            const userId = req.user?.userId!;
-            const eventData = req.body;
-            eventData.creator = { id: userId };
+            const createEventDto = new CreateEventDto();
+            Object.assign(createEventDto, req.body);
+            createEventDto.creatorId = req.user?.userId!;
 
-            const usersEmail = eventData.inUser;
-            eventData.inUser = [];
-            for (const user of usersEmail) {
-                const tempUser = await this.usersService.getUserByEmail(user?.email!);
-                if (tempUser) {
-                    eventData.inUser.push(user);
-                }
+            const errors = await validate(createEventDto);
+            if (errors.length > 0) {
+                res.status(400).json({ errors: errors.map(error => Object.values(error.constraints!)) });
+                return;
             }
 
-            const newEvent = await this.eventsService.createEvent(eventData);
-            const users = await this.eventsService.getUsersForEvent(newEvent.id!);
-
-            users.forEach(user => {
-                this.notificationsService.createNotification(user.id!, `Vous avez été ajouté à l'événement ${newEvent.title}.`);
-            });
-
+            const newEvent = await this.eventsService.createEvent(createEventDto);
             res.status(201).json(newEvent);
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });
@@ -65,18 +58,17 @@ export class EventsController {
         try {
             const eventId = parseInt(req.params.id, 10);
             const userId = req.user!.userId!;
-            const updatedData = req.body;
 
-            const updatedEvent = await this.eventsService.updateEvent(eventId, updatedData);
-            const users = await this.eventsService.getUsersForEvent(eventId);
+            const updateEventDto = new UpdateEventDto();
+            Object.assign(updateEventDto, req.body);
 
-            users.forEach(user => {
-                this.notificationsService.createNotification(user.id!, `L'événement ${updatedEvent.title} a été mis à jour.`);
-            });
+            const errors = await validate(updateEventDto);
+            if (errors.length > 0) {
+                res.status(400).json({ errors: errors.map(error => Object.values(error.constraints!)) });
+                return;
+            }
 
-            const creator = await this.eventsService.getEventCreator(eventId);
-            await this.notificationsService.createNotification(creator.id!, `Votre événement ${updatedEvent.title} a été mis à jour.`);
-
+            const updatedEvent = await this.eventsService.updateEvent(eventId, updateEventDto, userId);
             res.status(200).json(updatedEvent);
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });
@@ -88,19 +80,7 @@ export class EventsController {
             const eventId = parseInt(req.params.id, 10);
             const userId = req.user?.userId!;
 
-            const event = await this.eventsService.findEventById(eventId);
-            const users = await this.eventsService.getUsersForEvent(eventId);
-
-            const deletedEvent = await this.eventsService.deleteEvent(eventId, userId);
-            if (!deletedEvent) {
-                res.status(404).json({ message: 'Event not found or you do not have permission to delete it' });
-                return;
-            }
-
-            users.forEach(user => {
-                this.notificationsService.createNotification(user.id!, `L'événement ${event.title} a été annulé.`);
-            });
-
+            await this.eventsService.deleteEvent(eventId, userId);
             res.status(204).send();
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });
@@ -135,13 +115,6 @@ export class EventsController {
         try {
             const userId = req.user?.userId!;
             const events = await this.eventsService.getUserEvents(userId);
-
-            events.sort((a, b) => {
-                const dateA = new Date(a.startDate!);
-                const dateB = new Date(b.startDate!);
-                return dateA.getTime() - dateB.getTime();
-            });
-
             res.status(200).json(events);
         } catch (error) {
             res.status(500).json({ message: (error as Error).message });

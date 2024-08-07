@@ -4,7 +4,7 @@ services:
   client:
     build: ./client
     ports:
-      - "4201:4200"
+      - "4200:4200"
     depends_on:
       - server
 
@@ -14,6 +14,7 @@ services:
       - "3001:3000"
     environment:
       - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - CORS_ORIGIN=http://localhost:4200
     depends_on:
       - db
 
@@ -26,7 +27,7 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5433:5432"
+      - "5432:5432"
 
 volumes:
   postgres_data:
