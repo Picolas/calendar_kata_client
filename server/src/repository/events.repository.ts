@@ -106,8 +106,12 @@ export class EventsRepository implements IEventsRepository {
                     { inUser: { some: { userId: userId } } }
                 ],
                 AND: [
-                    { startDate: { gte: startDate } },
-                    { endDate: { lte: endDate } }
+                    {
+                        OR: [
+                            { startDate: { lte: endDate } },
+                            { endDate: { gte: startDate } }
+                        ]
+                    }
                 ]
             },
             include: {
