@@ -48,5 +48,5 @@
 	</div>
 }
 @if (isOpen && isEditOpen && event?.creator?.id === user?.id) {
-	<app-edit-event [event]="event"></app-edit-event>
+	<app-edit-event [event]="event" (onSubmit)="updateEvent($event)"></app-edit-event>
 }

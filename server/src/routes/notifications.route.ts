@@ -10,7 +10,7 @@ export const configureNotificationsRoutes = (router: Router, container: Containe
 
     router.get('/', authMiddleware, notificationsController.getUserNotifications);
     router.get('/unread', authMiddleware, notificationsController.getUnreadNotifications);
-    router.patch('/:id', authMiddleware, notificationsController.readNotification);
+    router.patch('/:id', authMiddleware, notificationsController.markAsRead);
 
     return router;
 };

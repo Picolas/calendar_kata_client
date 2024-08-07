@@ -1,44 +1,28 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {PartialEvent} from "../../interfaces/Event";
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {EventService} from "../../services/EventService/event.service";
-
-import {EventPopupService} from "../../services/EventPopupService/event-popup.service";
-import {catchError} from "rxjs/operators";
-import {of} from "rxjs";
-import {RefreshDaysService} from "../../services/RefreshDaysService/refresh-days.service";
-import {HotToastService} from "@ngxpert/hot-toast";
-import {ErrorComponent} from "../error/error.component";
-import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
+import {PartialEvent} from '../../interfaces/Event';
+import {UpdateEventDto} from '../../dtos/UpdateEventDto';
 
 @Component({
 	selector: 'app-edit-event',
 	standalone: true,
-	imports: [
-		ReactiveFormsModule,
-		ErrorComponent
-	],
+	imports: [ReactiveFormsModule],
 	templateUrl: './edit-event.component.html',
 	styleUrl: './edit-event.component.css'
 })
 export class EditEventComponent implements OnInit {
 	@Input() event: PartialEvent | null = null;
+	@Output() onSubmit = new EventEmitter<UpdateEventDto>();
 
-	eventForm: FormGroup<{
-		title: FormControl,
-		description: FormControl,
-		startDate: FormControl,
-		endDate: FormControl,
-		//inUser: FormArray
-	}>;
+	eventForm: FormGroup;
 
-	constructor(private fb: FormBuilder, private eventService: EventService, private eventPopupService: EventPopupService, private refreshDaysService: RefreshDaysService, private toast: HotToastService, private errorStateService: ErrorStateService) {
+	constructor(private fb: FormBuilder) {
 		this.eventForm = this.fb.group({
-			title: this.fb.control('', Validators.required),
-			description: this.fb.control('', Validators.required),
-			startDate: this.fb.control('', Validators.required),
-			endDate: this.fb.control('', Validators.required),
-			//inUser: this.fb.array([])
+			title: ['', Validators.required],
+			description: ['', Validators.required],
+			startDate: ['', Validators.required],
+			endDate: ['', Validators.required],
+			inUser: this.fb.array([])
 		});
 	}
 
@@ -53,52 +37,36 @@ export class EditEventComponent implements OnInit {
 				startDate: startDate.toISOString().substring(0, 16),
 				endDate: endDate.toISOString().substring(0, 16)
 			});
-			//this.event.inUser!.forEach(user => this.inUser.push(this.fb.control(user.email)));
+
+			this.event.inUser?.forEach(user => this.inUser.push(this.fb.control(user.email)));
 		}
 	}
 
-	/*
 	get inUser() {
 		return this.eventForm.get('inUser') as FormArray;
 	}
 
 	addParticipant() {
-		this.inUser.push(this.fb.control(''));
+		this.inUser.push(this.fb.control('', [Validators.required, Validators.email]));
 	}
 
 	removeParticipant(index: number) {
 		this.inUser.removeAt(index);
 	}
-	 */
 
-	onSubmit() {
-		if (!this.event || this.eventForm.invalid) {
+	onSubmitForm() {
+		if (this.eventForm.invalid) {
 			return;
 		}
 
-		const startDate = new Date(this.eventForm.value.startDate);
-		const endDate = new Date(this.eventForm.value.endDate);
-		const updatedEvent: PartialEvent = {
-			...this.event,
+		const updatedEvent: UpdateEventDto = {
 			title: this.eventForm.value.title,
 			description: this.eventForm.value.description,
-			startDate: new Date(this.eventForm.value.startDate),
-			endDate: new Date(this.eventForm.value.endDate),
-			//inUser: this.eventForm.value.inUser.map(name => ({name}))
+			startDate: new Date(this.eventForm.value.startDate).toISOString(),
+			endDate: new Date(this.eventForm.value.endDate).toISOString(),
+			inUser: this.eventForm.value.inUser
 		};
 
-		this.eventService.updateEvent(updatedEvent).pipe(
-			catchError(error => {
-				console.error('Error submit edition', error);
-				this.errorStateService.setError(error.error.message);
-				return of(null);
-			})
-		).subscribe(event => {
-				this.event = null;
-				this.eventPopupService.closeModal();
-				this.refreshDaysService.refreshEvents(startDate, endDate);
-				this.toast.success(`L'événement ${event.title} a bien été modifié`);
-			}
-		);
+		this.onSubmit.emit(updatedEvent);
 	}
 }

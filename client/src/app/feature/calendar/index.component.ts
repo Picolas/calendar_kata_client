@@ -10,6 +10,7 @@ import {catchError, switchMap} from "rxjs/operators";
 import {PartialUser} from "../../interfaces/User";
 import {ErrorComponent} from "../../shared/error/error.component";
 import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
+import {of} from "rxjs";
 
 @Component({
 	selector: 'app-calendar-index',
@@ -26,49 +27,45 @@ export class IndexComponent implements OnInit {
 	days: PartialDay[] = [];
 	month: Date = new Date();
 	user: PartialUser | null = null;
-	error = null;
+	error: string | null = null;
 
 	constructor(private daysService: DaysService, private refreshDaysService: RefreshDaysService, private authService: AuthService, private eventService: EventService, private errorStateService: ErrorStateService) {
 	}
 
 	ngOnInit() {
-		this.user = this.authService.getUser()!;
+		this.user = this.authService.getUser();
+		if (!this.user || !this.user.id) {
+			this.errorStateService.setError('User not authenticated');
+			return;
+		}
 
-		this.daysService.getDays(this.month, this.user?.id!).pipe(
-			catchError((error) => {
-				this.errorStateService.setError(error.error.message);
-				return error;
-			}),
-		).subscribe((response: any) => {
-			this.days = response.days;
-		});
+		this.fetchDays();
 
 		this.refreshDaysService.getRefreshEventsSubject().pipe(
-			switchMap(({startDate, endDate}) => this.daysService.getDays(this.month, this.user?.id!!)),
-			catchError((error) => {
-				this.errorStateService.setError(error.error.message);
-				return error;
-			}),
-		).subscribe((response: any) => {
-			if (response.days) {
-				this.days = response.days;
-			}
-		});
+			switchMap(async () => this.fetchDays())
+		).subscribe();
 
-		this.errorStateService.getError().subscribe((error: any) => {
+		this.errorStateService.getError().subscribe((error: string | null) => {
 			this.error = error;
 		});
 	}
 
 	onMonthChange(month: Date) {
 		this.month = month;
-		this.daysService.getDays(this.month, this.user?.id!!).pipe(
+		this.fetchDays();
+	}
+
+	private fetchDays() {
+		if (!this.user || !this.user.id) {
+			return of(null);
+		}
+		return this.daysService.getDays(this.month, this.user.id).pipe(
 			catchError((error) => {
-				this.errorStateService.setError(error.error.message);
-				return error;
-			}),
-		).subscribe((response: any) => {
-			if (response.days) {
+				this.errorStateService.setError(error.error.message || 'An error occurred');
+				return of({days: []});
+			})
+		).subscribe((response: { days: PartialDay[] } | null) => {
+			if (response) {
 				this.days = response.days;
 			}
 		});

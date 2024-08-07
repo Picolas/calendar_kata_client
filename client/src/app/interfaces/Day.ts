@@ -1,4 +1,4 @@
-import {Event, PartialEvent} from "./Event";
+import {PartialEvent} from "./Event";
 
 export interface Day {
 	id: string;

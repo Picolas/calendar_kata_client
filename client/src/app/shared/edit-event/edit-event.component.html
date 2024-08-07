@@ -1,6 +1,6 @@
 @if (event) {
 	<div class="my-1 rounded relative p-5 border-slate-300 border-solid border-s-2 bg-slate-100">
-		<form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
+		<form [formGroup]="eventForm" (ngSubmit)="onSubmitForm()" class="flex flex-col gap-2">
 			<div class="title flex flex-col">
 				<label for="title">Titre</label>
 				<input type="text" id="title" formControlName="title"
@@ -47,39 +47,37 @@
 					}
 				</div>
 			</div>
-			<!--
 			<div class="participants flex flex-col gap-2 mb-2">
-			  <label for="participants">Participants</label>
-			  <div formArrayName="inUser">
-				@for (user of inUser.controls; let i = index; track user) {
-				  <div class="flex flex-row gap-1 mb-0.5">
-					<input
-					  class="mt-1 block px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-					  [formControlName]="i" placeholder="Email du participant">
-					<button
-					  class="text-slate-950"
-					  type="button" (click)="removeParticipant(i)">X
-					</button>
-					@if (user.invalid && user.touched) {
-					  <div class="text-red-500 text-sm">
-						Email invalide.
-					  </div>
+				<label for="participants">Participants</label>
+				<div formArrayName="inUser">
+					@for (user of inUser.controls; let i = $index; track user) {
+						<div class="flex flex-row gap-1 mb-0.5">
+							<input
+								class="mt-1 block px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
+								[formControlName]="i" placeholder="Email du participant">
+							<button
+								class="text-slate-950"
+								type="button" (click)="removeParticipant(i)">X
+							</button>
+						</div>
+						@if (user.invalid && user.dirty) {
+							<div class="text-red-500 text-sm">
+								Email invalide.
+							</div>
+						}
 					}
-				  </div>
-				}
-			  </div>
-			  <div class="add-participant">
-				<button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
-				  type="button" (click)="addParticipant()">Ajouter un participant
-				</button>
-			  </div>
+				</div>
+				<div class="add-participant">
+					<button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
+							type="button" (click)="addParticipant()">Ajouter un participant
+					</button>
+				</div>
 			</div>
-			-->
 			<hr>
 			<div class="save">
 				<button [disabled]="eventForm.invalid"
 						class="text-slate-50 py-0.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-md"
-						type="submit">Enregistrer
+						type="submit">Modifier
 				</button>
 			</div>
 		</form>

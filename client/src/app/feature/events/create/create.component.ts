@@ -6,6 +6,7 @@ import {catchError} from "rxjs/operators";
 import {of} from "rxjs";
 import {HotToastService} from "@ngxpert/hot-toast";
 import {ErrorComponent} from "../../../shared/error/error.component";
+import {CreateEventDto} from "../../../dtos/CreateEventDto";
 
 @Component({
 	selector: 'app-create',
@@ -20,14 +21,14 @@ import {ErrorComponent} from "../../../shared/error/error.component";
 })
 export class CreateComponent {
 	addEventForm: FormGroup<{
-		title: FormControl,
-		description: FormControl,
-		startDate: FormControl,
-		endDate: FormControl,
-		inUser: FormArray
+		title: FormControl<string | null>,
+		description: FormControl<string | null>,
+		startDate: FormControl<string | null>,
+		endDate: FormControl<string | null>,
+		inUser: FormArray<FormControl<string | null>>
 	}>;
 
-	error = null;
+	error: string | null = null;
 
 	constructor(private fb: FormBuilder, private eventService: EventService, private toast: HotToastService) {
 		this.addEventForm = this.fb.group({
@@ -56,25 +57,26 @@ export class CreateComponent {
 			return;
 		}
 
-		const event = {
-			title: this.addEventForm.value.title,
-			description: this.addEventForm.value.description,
-			startDate: this.addEventForm.value.startDate,
-			endDate: this.addEventForm.value.endDate,
-			inUser: this.addEventForm.value.inUser
+		const event: CreateEventDto = {
+			title: this.addEventForm.value.title!,
+			description: this.addEventForm.value.description!,
+			startDate: new Date(this.addEventForm.value.startDate!).toISOString(),
+			endDate: new Date(this.addEventForm.value.endDate!).toISOString(),
+			inUser: this.addEventForm.value.inUser!.filter(email => email !== null) as string[]
 		};
 
 		this.eventService.createEvent(event).pipe(
 			catchError(error => {
-				console.error('Error submit edition', error);
+				console.error('Error submitting event creation', error);
 				this.error = error.error.message;
 				return of(null);
 			})
 		).subscribe((response) => {
 			if (response) {
 				this.toast.success(`L'événement ${event.title} a bien été créé`);
+				this.addEventForm.reset();
+				this.inUser.clear();
 			}
 		});
 	}
-
 }

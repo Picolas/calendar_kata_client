@@ -1,7 +1,9 @@
 import {Injectable} from '@angular/core';
-import {API_PATH, API_URL} from "../../constants/constants";
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {HttpClient} from '@angular/common/http';
+import {Observable} from 'rxjs';
+import {API_PATH, API_URL} from '../../constants/constants';
+import {UpdateEventDto} from '../../dtos/UpdateEventDto';
+import {CreateEventDto} from "../../dtos/CreateEventDto";
 import {PartialEvent} from "../../interfaces/Event";
 
 @Injectable({
@@ -13,31 +15,20 @@ export class EventService {
 	constructor(private http: HttpClient) {
 	}
 
-	getEvents(): Observable<any> {
-		return this.http.get(`${this.apiUrl}/events`);
+	createEvent(createEventDto: CreateEventDto): Observable<PartialEvent> {
+		return this.http.post<PartialEvent>(this.apiUrl, createEventDto);
 	}
 
-	getEvent(eventId: number): Observable<any> {
-		return this.http.get(`${this.apiUrl}/event/${eventId}`);
+	getEvents(): Observable<PartialEvent[]> {
+		return this.http.get<PartialEvent[]>(this.apiUrl, {});
 	}
 
-	getEventsOnInterval(startDate: string, endDate: string): Observable<any> {
-		return this.http.get(`${this.apiUrl}/interval/${startDate}/${endDate}`);
+	updateEvent(id: number, updateEventDto: UpdateEventDto): Observable<PartialEvent> {
+		console.log('updateEventDto', updateEventDto);
+		return this.http.put<PartialEvent>(`${this.apiUrl}/${id}`, updateEventDto);
 	}
 
-	getUserEventsOfDay(userId: number, day: string): Observable<any> {
-		return this.http.get(`${this.apiUrl}/user/${userId}/${day}`);
-	}
-
-	createEvent(event: PartialEvent): Observable<any> {
-		return this.http.post(`${this.apiUrl}`, event);
-	}
-
-	updateEvent(event: PartialEvent): Observable<any> {
-		return this.http.put(`${this.apiUrl}/${event.id}`, event);
-	}
-
-	deleteEvent(eventId: number): Observable<any> {
-		return this.http.delete(`${this.apiUrl}/${eventId}`);
+	deleteEvent(id: number): Observable<void> {
+		return this.http.delete<void>(`${this.apiUrl}/${id}`);
 	}
 }

@@ -1,79 +1,67 @@
-import { PrismaClient } from '@prisma/client';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { PartialUser, User } from '../interfaces/User';
+import {compare, hash} from 'bcryptjs';
+import {sign, verify} from 'jsonwebtoken';
 import dotenv from "dotenv";
-import {DecodedUser} from "../interfaces/UserRequest";
 import {inject, injectable} from "inversify";
 import {TYPES} from "../constants/types";
-import {IAuthService} from "../interfaces/IAuthService";
+import {IAuthService} from "../interfaces/Service/IAuthService";
+import {LoginDto} from "../dtos/LoginDto";
+import {UserDto} from "../dtos/UserDto";
+import {IAuthRepository} from "../interfaces/Repository/IAuthRepository";
+import {RegisterDto} from "../dtos/RegisterDto";
+import {plainToInstance} from "class-transformer";
 dotenv.config();
 
 @injectable()
 export class AuthService implements IAuthService {
     public jwtSecret = process.env.JWT_SECRET!;
 
-    constructor(@inject(TYPES.PrismaClient) private prisma: PrismaClient) {}
+    constructor(@inject(TYPES.AuthRepository) private authRepository: IAuthRepository) {}
 
-    public async register(name: string, email: string, password: string): Promise<PartialUser> {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-        if (user) {
+    public async login(loginDto: LoginDto): Promise<{ user: UserDto; token: string }> {
+        const user = await this.authRepository.findByEmail(loginDto.email);
+        if (!user || !(await compare(loginDto.password, user.password))) {
+            throw new Error('Invalid credentials');
+        }
+
+        const token = this.generateToken(user.id);
+        const userDto = plainToInstance(UserDto, user, { excludeExtraneousValues: true });
+
+        return { user: userDto, token };
+    }
+
+    public async register(registerDto: RegisterDto): Promise<UserDto> {
+        const existingUser = await this.authRepository.findByEmail(registerDto.email);
+        if (existingUser) {
             throw new Error('User already exists');
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = await this.prisma.user.create({
-            data: {
-                name,
-                email,
-                password: hashedPassword,
-            },
+        const hashedPassword = await hash(registerDto.password, 10);
+        const newUser = await this.authRepository.create({
+            ...registerDto,
+            password: hashedPassword
         });
 
-        return this.stripPassword(newUser);
+        return plainToInstance(UserDto, newUser, { excludeExtraneousValues: true });
     }
 
-    public async login(email: string, password: string): Promise<{ token: string, cookie: string, user: PartialUser }> {
-        const user = await this.prisma.user.findUnique({ where: { email } });
-
-        const isPasswordValid = user && await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            throw new Error('Invalid email or password');
-        }
-
-        const token = this.createToken(user);
-        const cookie = this.createCookie(token);
-
-        return { token, cookie, user: this.stripPassword(user) };
+    public async logout(token: string): Promise<void> {
+        await this.authRepository.invalidateToken(token);
     }
 
-    public async logout(token: string) {
-        console.log('logout', token);
-    }
-
-    public createToken(user: User) {
-        return jwt.sign({ userId: user.id }, this.jwtSecret, { expiresIn: '1h' });
-    }
-
-    public createCookie(token: string) {
-        return `Authorization=${token}; HttpOnly; Path=/; Max-Age=3600`;
-    }
-
-    public verifyToken(token: string): DecodedUser {
+    public async refreshToken(token: string): Promise<string> {
         try {
-            return jwt.verify(token, this.jwtSecret) as DecodedUser;
+            const decoded = verify(token, process.env.JWT_SECRET!) as { userId: number };
+            const user = await this.authRepository.findById(decoded.userId);
+            if (!user) {
+                throw new Error('User not found');
+            }
+            return this.generateToken(user.id);
         } catch (error) {
             throw new Error('Invalid token');
         }
     }
 
-    public refreshToken(token: string) {
-        const decodedUser = this.verifyToken(token);
-        return this.createToken({ id: decodedUser.userId } as User);
-    }
-
-    private stripPassword(user: PartialUser) {
-        const { password: _, ...partialUser } = user;
-        return partialUser;
+    private generateToken(userId: number): string {
+        return sign({ userId }, process.env.JWT_SECRET!, { expiresIn: '1h' });
     }
 }

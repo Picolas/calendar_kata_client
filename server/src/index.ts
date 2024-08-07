@@ -6,8 +6,6 @@ import { configureContainer } from './utils/DependencyInjection';
 import { errorHandler } from './middlewares/error.middleware';
 import configureRoutes from './routes/configure.routes';
 import { appConfig } from './config/app.config';
-import { TYPES } from './constants/types';
-import { SocketController } from './controllers/socket.controller';
 
 const app = express();
 const httpServer = createServer(app);
@@ -15,10 +13,14 @@ const httpServer = createServer(app);
 app.use(cors(appConfig.cors));
 app.use(express.json());
 
-const container = configureContainer(httpServer);
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', appConfig.cors.origin);
+    res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,PATCH,OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+});
 
-const socketController = container.get<SocketController>(TYPES.SocketController);
-const io = socketController.getIO();
+const container = configureContainer(httpServer);
 
 configureRoutes(app, container);
 

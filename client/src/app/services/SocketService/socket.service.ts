@@ -12,6 +12,9 @@ export class SocketService {
 
 	constructor() {
 		this.socket = io(API_URL);
+		this.socket.on('connect', () => {
+			console.log('connected to server');
+		});
 	}
 
 	subscribeToNotifications(userId: number) {
