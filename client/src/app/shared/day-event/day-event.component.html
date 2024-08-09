@@ -7,35 +7,4 @@
         {{ event?.startDate | date: 'HH:mm':'UTC' }}</span>
 	}
 	{{ event?.title }}
-
-	@if (showDescription && day && day.events && day.events.length <= maxEventUntilReduce) {
-		<div class="event-description line-clamp-2 text-xxxs sm:text-xxxs md:text-xxs lg:text-xxs"
-		>{{ event?.description }}
-		</div>
-	}
 </div>
-<!--
-	<div class="header">
-		@if (!(event?.startDate | isMultipleDay: event?.endDate)) {
-			<span
-				class="text-xxs text-center px-0.5 py-0.5 bg-indigo-100 rounded-md ml-0.5 mr-1">
-        {{ event?.startDate | date: 'HH:mm':'UTC' }}
-
-				@if (event?.startDate | isEndDateEqualStartDate: event?.endDate) {
-					<span>-
-						{{ event?.endDate | date: 'HH:mm':'UTC' }}
-          </span>
-				}
-
-      </span>
-		}
-		<span class="event-title text-xxs mb-0.5 font-bold">{{ event?.title }}
-    </span>
-	</div>
-	@if (showDescription && day && day.events && day.events.length <= maxEventUntilReduce) {
-		<div class="event-description line-clamp-2 text-xs"
-		>{{ event?.description }}
-		</div>
-	}
-</div>
--->

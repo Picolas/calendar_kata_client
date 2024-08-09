@@ -6,6 +6,9 @@ import {catchError, switchMap} from 'rxjs/operators';
 import {of} from 'rxjs';
 import {ErrorComponent} from "../../shared/error/error.component";
 import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
+import {ButtonComponent} from "../../shared/button/button.component";
+import {InputComponent} from "../../shared/input/input.component";
+import {FormComponent} from "../../shared/form/form.component";
 
 @Component({
 	selector: 'app-register',
@@ -13,7 +16,10 @@ import {ErrorStateService} from "../../services/ErrorStateService/error-state.se
 	imports: [
 		FormsModule,
 		ReactiveFormsModule,
-		ErrorComponent
+		ErrorComponent,
+		ButtonComponent,
+		InputComponent,
+		FormComponent
 	],
 	templateUrl: './register.component.html',
 	styleUrl: './register.component.css'
@@ -22,11 +28,7 @@ export class RegisterComponent implements OnInit {
 	nameCtrl: FormControl;
 	emailCtrl: FormControl;
 	passwordCtrl: FormControl;
-	registerForm: FormGroup<{
-		name: FormControl,
-		email: FormControl,
-		password: FormControl
-	}>;
+	registerForm: FormGroup;
 	error: string | null = null;
 
 	constructor(private router: Router, private fb: FormBuilder, private authService: AuthService, private errorStateService: ErrorStateService) {

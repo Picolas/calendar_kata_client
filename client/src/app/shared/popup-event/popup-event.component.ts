@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {PartialDay} from "../../interfaces/Day";
 import {IsEndDateEqualStartDatePipe} from "../../pipes/IsEndDateEqualStartDate/is-end-date-equal-start-date.pipe";
 import {DatePipe} from "@angular/common";
@@ -29,7 +29,7 @@ import {PartialEvent} from "../../interfaces/Event";
 	templateUrl: './popup-event.component.html',
 	styleUrl: './popup-event.component.css'
 })
-export class PopupEventComponent {
+export class PopupEventComponent implements OnInit {
 	event: PartialEvent | null = null;
 	day: PartialDay | null = null;
 	isOpen = false;

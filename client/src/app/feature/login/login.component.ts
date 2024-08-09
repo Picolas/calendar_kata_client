@@ -6,13 +6,19 @@ import {catchError} from 'rxjs/operators';
 import {of} from 'rxjs';
 import {ErrorComponent} from "../../shared/error/error.component";
 import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
+import {InputComponent} from "../../shared/input/input.component";
+import {ButtonComponent} from "../../shared/button/button.component";
+import {FormComponent} from "../../shared/form/form.component";
 
 @Component({
 	selector: 'app-login',
 	standalone: true,
 	imports: [
 		ReactiveFormsModule,
-		ErrorComponent
+		ErrorComponent,
+		InputComponent,
+		ButtonComponent,
+		FormComponent
 	],
 	templateUrl: './login.component.html',
 	styleUrl: './login.component.css'

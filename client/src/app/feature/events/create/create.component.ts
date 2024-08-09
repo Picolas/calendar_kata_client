@@ -7,6 +7,9 @@ import {of} from "rxjs";
 import {HotToastService} from "@ngxpert/hot-toast";
 import {ErrorComponent} from "../../../shared/error/error.component";
 import {CreateEventDto} from "../../../dtos/CreateEventDto";
+import {InputComponent} from "../../../shared/input/input.component";
+import {FormComponent} from "../../../shared/form/form.component";
+import {ButtonComponent} from "../../../shared/button/button.component";
 
 @Component({
 	selector: 'app-create',
@@ -14,7 +17,10 @@ import {CreateEventDto} from "../../../dtos/CreateEventDto";
 	imports: [
 		EventComponent,
 		ReactiveFormsModule,
-		ErrorComponent
+		ErrorComponent,
+		InputComponent,
+		FormComponent,
+		ButtonComponent
 	],
 	templateUrl: './create.component.html',
 	styleUrl: './create.component.css'

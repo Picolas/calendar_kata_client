@@ -2,11 +2,14 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {FormArray, FormBuilder, FormGroup, ReactiveFormsModule, Validators} from '@angular/forms';
 import {PartialEvent} from '../../interfaces/Event';
 import {UpdateEventDto} from '../../dtos/UpdateEventDto';
+import {InputComponent} from "../input/input.component";
+import {FormComponent} from "../form/form.component";
+import {ButtonComponent} from "../button/button.component";
 
 @Component({
 	selector: 'app-edit-event',
 	standalone: true,
-	imports: [ReactiveFormsModule],
+	imports: [ReactiveFormsModule, InputComponent, FormComponent, ButtonComponent],
 	templateUrl: './edit-event.component.html',
 	styleUrl: './edit-event.component.css'
 })

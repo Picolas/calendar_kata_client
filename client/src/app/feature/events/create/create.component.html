@@ -9,84 +9,71 @@
 	</div>
 	<div
 		class="mb-5 flex flex-col gap-2 my-1 rounded relative p-5 border-slate-300 border-solid border-s-2 bg-slate-100">
-		<form [formGroup]="addEventForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-2">
-			<div class="title flex flex-col">
-				<label for="title">Titre</label>
-				<input type="text" id="title" formControlName="title"
-					   class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-					   required/>
-				@if (addEventForm.get('title')?.invalid && addEventForm.get('title')?.dirty) {
-					<div class="text-red-500 text-sm">
-						Le titre est requis.
-					</div>
-				}
-			</div>
-			<div class="description flex flex-col">
-				<label for="description">Description</label>
-				<textarea type="text" id="description" formControlName="description"
-						  class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-						  required></textarea>
-				@if (addEventForm.get('description')?.invalid && addEventForm.get('description')?.dirty) {
-					<div class="text-red-500 text-sm">
-						La description est requise.
-					</div>
-				}
-			</div>
+		<app-form [formGroup]="addEventForm" (submitForm)="onSubmit()">
+			<app-input
+				label="Titre"
+				type="text"
+				id="title"
+				formControlName="title"
+				[required]="true"
+			></app-input>
+			<app-input
+				label="Description"
+				type="textarea"
+				id="description"
+				formControlName="description"
+				[required]="true"
+			></app-input>
 			<div class="event-dates flex flex-col sm:flex-col md:flex-row lg:flex-row gap-2">
-				<div class="start-date flex flex-col">
-					<label for="startDate">Date de début</label>
-					<input
-						class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-						type="datetime-local" id="startDate" formControlName="startDate" required>
-					@if (addEventForm.get('startDate')?.invalid && addEventForm.get('startDate')?.dirty) {
-						<div class="text-red-500 text-sm">
-							La date de début est requise.
-						</div>
-					}
-				</div>
-				<div class="end-date flex flex-col">
-					<label for="endDate">Date de fin</label>
-					<input
-						class="mt-1 block w-full px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-						type="datetime-local" id="endDate" formControlName="endDate" required>
-					@if (addEventForm.get('endDate')?.invalid && addEventForm.get('endDate')?.dirty) {
-						<div class="text-red-500 text-sm">
-							La date de fin est requise.
-						</div>
-					}
-				</div>
+				<app-input
+					label="Date de début"
+					type="datetime-local"
+					id="startDate"
+					formControlName="startDate"
+					[required]="true"
+				></app-input>
+				<app-input
+					label="Date de fin"
+					type="datetime-local"
+					id="endDate"
+					formControlName="endDate"
+					[required]="true"
+				></app-input>
 			</div>
 			<div class="participants flex flex-col gap-2 mb-2">
 				<label for="participants">Participants</label>
 				<div formArrayName="inUser">
 					@for (user of inUser.controls; let i = $index; track user) {
 						<div class="flex flex-col gap-1">
-							<div class="flex flex-row gap-1 mb-0.5">
-								<input
-									class="mt-1 block px-3 py-2 border border-slate-200 bg-slate-50 rounded-md shadow-sm focus:outline-none focus:ring-slate-500 focus:border-slate-500 sm:text-sm"
-									[formControlName]="i" placeholder="Email du participant">
-								<button class="text-slate-950" type="button" (click)="removeParticipant(i)">X</button>
+							<div class="flex flex-row align-middle">
+								<app-input
+									[formControlName]="i"
+									placeholder="Email du participant"
+									type="email"
+								></app-input>
+								<app-button
+									type="button"
+									text="✗"
+									(onClick)="removeParticipant(i)"
+									class="text-3xl bg-transparent text-slate-950 hover:bg-transparent"
+								></app-button>
 							</div>
-							@if (user.invalid && user.dirty) {
-								<div class="text-red-500 text-sm">
-									Email invalide.
-								</div>
-							}
 						</div>
 					}
 				</div>
-				<div class="add-participant">
-					<button class="text-slate-950 py-0.5 px-2 bg-indigo-200 text-sm hover:bg-indigo-300 rounded-md"
-							type="button" (click)="addParticipant()">Ajouter un participant
-					</button>
-				</div>
+				<app-button
+					type="button"
+					text="Ajouter un participant"
+					(onClick)="addParticipant()"
+					class="text-sm"
+				></app-button>
 			</div>
-			<div class="save">
-				<button [disabled]="addEventForm.invalid"
-						class="text-slate-50 py-0.5 px-2 bg-slate-800 hover:bg-slate-700 rounded-md"
-						type="submit">Créer
-				</button>
-			</div>
-		</form>
+			<hr class="mb-2">
+			<app-button
+				[disabled]="addEventForm.invalid"
+				type="submit"
+				text="Créer l'évênement"
+			></app-button>
+		</app-form>
 	</div>
 </div>
