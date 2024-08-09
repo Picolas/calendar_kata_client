@@ -7,14 +7,14 @@
 				id="title"
 				formControlName="title"
 				[required]="true"
-			></app-input>
+			/>
 			<app-input
 				label="Description"
 				type="textarea"
 				id="description"
 				formControlName="description"
 				[required]="true"
-			></app-input>
+			/>
 			<div class="event-dates flex flex-col sm:flex-col md:flex-row lg:flex-row gap-2">
 				<app-input
 					label="Date de début"
@@ -22,15 +22,20 @@
 					id="startDate"
 					formControlName="startDate"
 					[required]="true"
-				></app-input>
+				/>
 				<app-input
 					label="Date de fin"
 					type="datetime-local"
 					id="endDate"
 					formControlName="endDate"
 					[required]="true"
-				></app-input>
+				/>
 			</div>
+			@if (eventForm.errors?.['dateOrder']) {
+				<div class="text-red-500">
+					La date de début doit être antérieure à la date de fin.
+				</div>
+			}
 			<div class="participants flex flex-col gap-2 mb-2">
 				<label for="participants">Participants</label>
 				<div formArrayName="inUser">
@@ -40,13 +45,13 @@
 								[formControlName]="i"
 								placeholder="Email du participant"
 								type="email"
-							></app-input>
+							/>
 							<app-button
 								type="button"
 								text="✗"
 								(onClick)="removeParticipant(i)"
 								class="text-3xl bg-transparent text-slate-950 hover:bg-transparent"
-							></app-button>
+							/>
 						</div>
 					}
 				</div>
@@ -55,14 +60,14 @@
 					text="Ajouter un participant"
 					(onClick)="addParticipant()"
 					class="text-sm"
-				></app-button>
+				/>
 			</div>
 			<hr class="mb-2">
 			<app-button
 				[disabled]="eventForm.invalid"
 				type="submit"
 				text="Sauvegarder"
-			></app-button>
+			/>
 		</app-form>
 	</div>
 }

@@ -1,14 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Router} from "@angular/router";
-import {AuthService} from "../../services/AuthService/auth.service";
-import {catchError} from 'rxjs/operators';
-import {of} from 'rxjs';
 import {ErrorComponent} from "../../shared/error/error.component";
 import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
 import {InputComponent} from "../../shared/input/input.component";
 import {ButtonComponent} from "../../shared/button/button.component";
 import {FormComponent} from "../../shared/form/form.component";
+import {AuthMapper} from "../../mappers/AuthMapper";
+import {AuthFormService} from "../../services/AuthFormService/auth-form.service";
 
 @Component({
 	selector: 'app-login',
@@ -24,21 +23,13 @@ import {FormComponent} from "../../shared/form/form.component";
 	styleUrl: './login.component.css'
 })
 export class LoginComponent implements OnInit {
-	emailCtrl: FormControl;
-	passwordCtrl: FormControl;
-	loginForm: FormGroup<{
-		email: FormControl,
-		password: FormControl
-	}>;
+	loginForm: FormGroup;
 	error: string | null = null;
 
-	constructor(private router: Router, private fb: FormBuilder, private authService: AuthService, private errorStateService: ErrorStateService) {
-		this.emailCtrl = this.fb.control('', [Validators.required, Validators.email]);
-		this.passwordCtrl = this.fb.control('', Validators.required);
-
+	constructor(private router: Router, private fb: FormBuilder, private authFormService: AuthFormService, private errorStateService: ErrorStateService) {
 		this.loginForm = this.fb.group({
-			email: this.emailCtrl,
-			password: this.passwordCtrl
+			email: this.fb.control('', [Validators.required, Validators.email]),
+			password: this.fb.control('', Validators.required),
 		});
 	}
 
@@ -49,22 +40,16 @@ export class LoginComponent implements OnInit {
 	}
 
 	onSubmit() {
-		this.authService.login(this.emailCtrl.value, this.passwordCtrl.value).pipe(
-			catchError(error => {
-				this.error = 'La connexion a échoué. Veuillez vérifier vos d\'identifiants et réessayer.';
-				console.error('Login bis:', error);
-				return of(null);
-			})
-		).subscribe({
-			next: (response) => {
-				if (response) {
-					this.router.navigate(['/']);
-				}
+		if (this.loginForm.invalid) {
+			return;
+		}
+		const loginDto = AuthMapper.toLoginDto(this.loginForm.value);
+		this.authFormService.login(loginDto).subscribe({
+			next: () => {
+				this.router.navigate(['/']);
 			},
 			error: (error) => {
-				this.error = 'La connexion a échoué. Veuillez vérifier vos d\'identifiants et réessayer.';
-				console.log(this.error);
-				console.error('Login error:', error);
+				this.error = error.error.message || 'La connexion a échoué. Veuillez vérifier vos identifiants et réessayer.';
 			}
 		});
 	}

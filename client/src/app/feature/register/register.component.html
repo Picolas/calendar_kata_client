@@ -1,9 +1,9 @@
 <div class="register container mx-auto justify-center flex flex-col py-12 px-6 lg:px-8">
 	@if (error) {
-		<app-error [error]="error"></app-error>
+		<app-error [error]="error"/>
 	}
 	<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-		<h1 class="text-3xl font-bold text-center">Register</h1>
+		<h1 class="text-3xl font-bold text-center">Inscription</h1>
 		<div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
 			<app-form [formGroup]="registerForm" (submitForm)="onSubmit()">
 				<app-input
@@ -11,25 +11,25 @@
 					type="text"
 					id="name"
 					formControlName="name"
-				></app-input>
+				/>
 				<app-input
 					label="Email"
 					type="email"
 					id="email"
 					formControlName="email"
-				></app-input>
+				/>
 				<app-input
 					label="Password"
 					type="password"
 					id="password"
 					formControlName="password"
-				></app-input>
+				/>
 				<app-button
 					[disabled]="registerForm.invalid"
 					type="submit"
-					text="Register"
+					text="Inscription"
 					class="w-full text-white bg-slate-700 hover:bg-slate-800 focus:ring-2 focus:ring-offset-2 focus:ring-slate-700"
-				></app-button>
+				/>
 			</app-form>
 			<a (click)="onClickLogin()" class="cursor-pointer">Connexion ?</a>
 		</div>

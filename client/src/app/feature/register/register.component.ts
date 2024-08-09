@@ -1,14 +1,13 @@
 import {Component, OnInit} from '@angular/core';
-import {FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
+import {FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators} from "@angular/forms";
 import {Router} from "@angular/router";
-import {AuthService} from "../../services/AuthService/auth.service";
-import {catchError, switchMap} from 'rxjs/operators';
-import {of} from 'rxjs';
 import {ErrorComponent} from "../../shared/error/error.component";
 import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
 import {ButtonComponent} from "../../shared/button/button.component";
 import {InputComponent} from "../../shared/input/input.component";
 import {FormComponent} from "../../shared/form/form.component";
+import {AuthMapper} from "../../mappers/AuthMapper";
+import {AuthFormService} from "../../services/AuthFormService/auth-form.service";
 
 @Component({
 	selector: 'app-register',
@@ -25,21 +24,14 @@ import {FormComponent} from "../../shared/form/form.component";
 	styleUrl: './register.component.css'
 })
 export class RegisterComponent implements OnInit {
-	nameCtrl: FormControl;
-	emailCtrl: FormControl;
-	passwordCtrl: FormControl;
 	registerForm: FormGroup;
 	error: string | null = null;
 
-	constructor(private router: Router, private fb: FormBuilder, private authService: AuthService, private errorStateService: ErrorStateService) {
-		this.nameCtrl = this.fb.control('', Validators.required);
-		this.emailCtrl = this.fb.control('', [Validators.required, Validators.email]);
-		this.passwordCtrl = this.fb.control('', Validators.required);
-
+	constructor(private router: Router, private fb: FormBuilder, private authFormService: AuthFormService, private errorStateService: ErrorStateService) {
 		this.registerForm = this.fb.group({
-			name: this.nameCtrl,
-			email: this.emailCtrl,
-			password: this.passwordCtrl
+			name: this.fb.control('', Validators.required),
+			email: this.fb.control('', [Validators.required, Validators.email]),
+			password: this.fb.control('', Validators.required)
 		});
 	}
 
@@ -50,32 +42,16 @@ export class RegisterComponent implements OnInit {
 	}
 
 	onSubmit() {
-		this.authService.register(this.nameCtrl.value, this.emailCtrl.value, this.passwordCtrl.value).pipe(
-			catchError(error => {
-				this.errorStateService.setError(error.error.message);
-				console.error('Registration error:', error);
-				return of(null);
-			}),
-			switchMap(response => {
-				if (response.error) {
-					this.errorStateService.setError(response.error);
-					return of(null);
-				} else {
-					if (response) {
-						return this.authService.login(this.emailCtrl.value, this.passwordCtrl.value);
-					}
-				}
-				return of(null);
-			})
-		).subscribe({
-			next: (response) => {
-				if (response) {
-					this.router.navigate(['/']);
-				}
+		if (this.registerForm.invalid) {
+			return;
+		}
+		const registerDto = AuthMapper.toRegisterDto(this.registerForm.value);
+		this.authFormService.register(registerDto).subscribe({
+			next: () => {
+				this.router.navigate(['/']);
 			},
 			error: (error) => {
-				console.error('Registration error:', error);
-				this.errorStateService.setError('Erreur lors de l\'inscription.');
+				this.error = error.error.message || 'L\'inscription a échoué. Veuillez vérifier vos identifiants et réessayer.';
 			}
 		});
 	}

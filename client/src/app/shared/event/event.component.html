@@ -32,9 +32,9 @@
             Participants :
           </span>
 				@for (user of event?.inUser; track user) {
-					<app-event-user [user]="user"></app-event-user>
+					<app-event-user [user]="user"/>
 				}
-				<app-event-user [user]="event?.creator!"></app-event-user>
+				<app-event-user [user]="event?.creator!"/>
 			</div>
 		}
 	</div>

@@ -1,15 +1,14 @@
 import {Component} from '@angular/core';
 import {EventComponent} from "../../../shared/event/event.component";
 import {FormArray, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators} from "@angular/forms";
-import {EventService} from "../../../services/EventService/event.service";
-import {catchError} from "rxjs/operators";
-import {of} from "rxjs";
 import {HotToastService} from "@ngxpert/hot-toast";
 import {ErrorComponent} from "../../../shared/error/error.component";
-import {CreateEventDto} from "../../../dtos/CreateEventDto";
 import {InputComponent} from "../../../shared/input/input.component";
 import {FormComponent} from "../../../shared/form/form.component";
 import {ButtonComponent} from "../../../shared/button/button.component";
+import {EventMapper} from "../../../mappers/EventMapper";
+import {EventFormService} from "../../../services/EventFormService/event-form.service";
+import {dateOrderValidator} from "../../../validators/date-order.validator";
 
 @Component({
 	selector: 'app-create',
@@ -26,24 +25,18 @@ import {ButtonComponent} from "../../../shared/button/button.component";
 	styleUrl: './create.component.css'
 })
 export class CreateComponent {
-	addEventForm: FormGroup<{
-		title: FormControl<string | null>,
-		description: FormControl<string | null>,
-		startDate: FormControl<string | null>,
-		endDate: FormControl<string | null>,
-		inUser: FormArray<FormControl<string | null>>
-	}>;
+	addEventForm: FormGroup;
 
 	error: string | null = null;
 
-	constructor(private fb: FormBuilder, private eventService: EventService, private toast: HotToastService) {
+	constructor(private fb: FormBuilder, private toast: HotToastService, private eventFormService: EventFormService) {
 		this.addEventForm = this.fb.group({
 			title: this.fb.control('', Validators.required),
 			description: this.fb.control('', Validators.required),
 			startDate: this.fb.control('', Validators.required),
 			endDate: this.fb.control('', Validators.required),
 			inUser: this.fb.array<FormControl<string | null>>([])
-		});
+		}, {validators: dateOrderValidator()});
 	}
 
 	get inUser() {
@@ -63,25 +56,14 @@ export class CreateComponent {
 			return;
 		}
 
-		const event: CreateEventDto = {
-			title: this.addEventForm.value.title!,
-			description: this.addEventForm.value.description!,
-			startDate: new Date(this.addEventForm.value.startDate!).toISOString(),
-			endDate: new Date(this.addEventForm.value.endDate!).toISOString(),
-			inUser: this.addEventForm.value.inUser!.filter(email => email !== null) as string[]
-		};
-
-		this.eventService.createEvent(event).pipe(
-			catchError(error => {
-				console.error('Error submitting event creation', error);
-				this.error = error.error.message;
-				return of(null);
-			})
-		).subscribe((response) => {
-			if (response) {
-				this.toast.success(`L'événement ${event.title} a bien été créé`);
+		const createEventDto = EventMapper.toCreateDto(this.addEventForm.value);
+		this.eventFormService.createEvent(createEventDto).subscribe({
+			next: () => {
 				this.addEventForm.reset();
 				this.inUser.clear();
+			},
+			error: (error) => {
+				this.error = error.message;
 			}
 		});
 	}

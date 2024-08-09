@@ -1,6 +1,6 @@
 <div class="container px-2 sm:px-2 md:px-0 lg:px-0 md:mx-auto lg:mx-auto my-5">
 	@if (error) {
-		<app-error [error]="error"></app-error>
+		<app-error [error]="error"/>
 	}
 	<div class="mb-5">
 		<h1 class="text-3xl font-bold">
@@ -9,7 +9,7 @@
 	</div>
 	<div class="mb-5 flex flex-col gap-2">
 		@for (event of events; track event.id) {
-			<app-event [event]="event"></app-event>
+			<app-event [event]="event"/>
 		} @empty {
 			<p>Vous n'avez aucun évênement de prévu !</p>
 		}

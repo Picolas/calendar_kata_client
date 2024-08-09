@@ -3,9 +3,6 @@ import {PartialDay} from "../../interfaces/Day";
 import {IsEndDateEqualStartDatePipe} from "../../pipes/IsEndDateEqualStartDate/is-end-date-equal-start-date.pipe";
 import {DatePipe} from "@angular/common";
 import {EventPopupService} from "../../services/EventPopupService/event-popup.service";
-import {EventService} from "../../services/EventService/event.service";
-import {catchError} from "rxjs/operators";
-import {of} from "rxjs";
 import {EventUserComponent} from "../event-user/event-user.component";
 import {EditEventComponent} from "../edit-event/edit-event.component";
 import {IsMultipleDayPipe} from "../../pipes/IsMultipleDay/is-multiple-day.pipe";
@@ -15,6 +12,7 @@ import {PartialUser} from "../../interfaces/User";
 import {ErrorStateService} from "../../services/ErrorStateService/error-state.service";
 import {UpdateEventDto} from "../../dtos/UpdateEventDto";
 import {PartialEvent} from "../../interfaces/Event";
+import {EventFormService} from "../../services/EventFormService/event-form.service";
 
 @Component({
 	selector: 'app-popup-event',
@@ -38,7 +36,7 @@ export class PopupEventComponent implements OnInit {
 
 	constructor(
 		private eventPopupService: EventPopupService,
-		private eventService: EventService,
+		private eventFormService: EventFormService,
 		private refreshDaysService: RefreshDaysService,
 		private authService: AuthService,
 		private errorStateService: ErrorStateService,
@@ -62,37 +60,32 @@ export class PopupEventComponent implements OnInit {
 	updateEvent(updatedEvent: UpdateEventDto) {
 		if (!this.event || !this.event.id) return;
 
-		updatedEvent.startDate = new Date(updatedEvent.startDate!).toISOString();
-		updatedEvent.endDate = new Date(updatedEvent.endDate!).toISOString();
-
-		this.eventService.updateEvent(this.event.id, updatedEvent).pipe(
-			catchError(error => {
-				console.error('PopupEventComponent.updateEvent', error);
-				this.errorStateService.setError(error.error.message);
-				return of(null);
-			})
-		).subscribe(event => {
-			if (event) {
+		this.eventFormService.updateEvent(this.event.id, updatedEvent).subscribe({
+			next: (event) => {
 				this.event = event;
 				this.isEditOpen = false;
 				this.refreshDaysService.refreshEvents(new Date(event.startDate!), new Date(event.endDate!));
+			},
+			error: (error) => {
+				console.error('PopupEventComponent.updateEvent', error);
+				this.errorStateService.setError(error.error.message);
 			}
 		});
 	}
 
 	deleteEvent() {
-		if (confirm('Êtes vous sûr ?') && this.event && this.event.id) {
-			this.eventService.deleteEvent(this.event.id).pipe(
-				catchError(error => {
+		if (confirm('Êtes vous sûr de vouloir supprimer cet évênement ?') && this.event && this.event.id) {
+			this.eventFormService.deleteEvent(this.event.id).subscribe({
+				next: () => {
+					this.event = null;
+					this.eventPopupService.setEvent(null);
+					this.eventPopupService.closeModal();
+					this.refreshDaysService.refreshEvents(new Date(), new Date());
+				},
+				error: (error) => {
 					console.error('PopupEventComponent.deleteEvent', error);
 					this.errorStateService.setError(error.error.message);
-					return of(null);
-				}),
-			).subscribe(() => {
-				this.event = null;
-				this.eventPopupService.setEvent(null);
-				this.eventPopupService.closeModal();
-				this.refreshDaysService.refreshEvents(new Date(), new Date());
+				}
 			});
 		}
 	}

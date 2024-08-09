@@ -5,6 +5,8 @@ import {UpdateEventDto} from '../../dtos/UpdateEventDto';
 import {InputComponent} from "../input/input.component";
 import {FormComponent} from "../form/form.component";
 import {ButtonComponent} from "../button/button.component";
+import {EventMapper} from "../../mappers/EventMapper";
+import {dateOrderValidator} from "../../validators/date-order.validator";
 
 @Component({
 	selector: 'app-edit-event',
@@ -26,7 +28,7 @@ export class EditEventComponent implements OnInit {
 			startDate: ['', Validators.required],
 			endDate: ['', Validators.required],
 			inUser: this.fb.array([])
-		});
+		}, {validators: dateOrderValidator()});
 	}
 
 	ngOnInit() {
@@ -62,14 +64,7 @@ export class EditEventComponent implements OnInit {
 			return;
 		}
 
-		const updatedEvent: UpdateEventDto = {
-			title: this.eventForm.value.title,
-			description: this.eventForm.value.description,
-			startDate: new Date(this.eventForm.value.startDate).toISOString(),
-			endDate: new Date(this.eventForm.value.endDate).toISOString(),
-			inUser: this.eventForm.value.inUser
-		};
-
-		this.onSubmit.emit(updatedEvent);
+		const updatedEventDto = EventMapper.toUpdateDto(this.eventForm.value);
+		this.onSubmit.emit(updatedEventDto);
 	}
 }

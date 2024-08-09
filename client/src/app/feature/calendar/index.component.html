@@ -1,6 +1,6 @@
 <div class="container px-2 sm:px-2 md:px-0 lg:px-0 md:mx-auto lg:mx-auto my-5 overflow-x-hidden">
 	@if (error) {
-		<app-error [error]="error"></app-error>
+		<app-error [error]="error"/>
 	}
 	<div class="mb-5">
 		<h1 class="text-3xl font-bold">
@@ -11,6 +11,6 @@
 		<app-popup-event/>
 	</div>
 	<div class="rounded border-slate-100 border-4 border-solid">
-		<app-calendar (monthChange)="onMonthChange($event)" [days]="days" [month]="month"></app-calendar>
+		<app-calendar (monthChange)="onMonthChange($event)" [days]="days" [month]="month"/>
 	</div>
 </div>

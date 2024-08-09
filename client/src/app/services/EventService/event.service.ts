@@ -20,11 +20,10 @@ export class EventService {
 	}
 
 	getEvents(): Observable<PartialEvent[]> {
-		return this.http.get<PartialEvent[]>(this.apiUrl, {});
+		return this.http.get<PartialEvent[]>(`${this.apiUrl}/events`, {});
 	}
 
 	updateEvent(id: number, updateEventDto: UpdateEventDto): Observable<PartialEvent> {
-		console.log('updateEventDto', updateEventDto);
 		return this.http.put<PartialEvent>(`${this.apiUrl}/${id}`, updateEventDto);
 	}
 

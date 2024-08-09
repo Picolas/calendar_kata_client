@@ -8,7 +8,7 @@
 					@if (event?.startDate | isEndDateEqualStartDate: event?.endDate) {
 						<span>-
 							{{ event?.endDate | date: 'HH:mm':'UTC' }}
-            </span>
+            	</span>
 					}
         </span>
 			}
@@ -24,9 +24,9 @@
             Participants :
           </span>
 					@for (user of event?.inUser; track user) {
-						<app-event-user [user]="user"></app-event-user>
+						<app-event-user [user]="user"/>
 					}
-					<app-event-user [user]="event?.creator!"></app-event-user>
+					<app-event-user [user]="event?.creator!"/>
 				</div>
 			}
 		</div>
@@ -48,5 +48,5 @@
 	</div>
 }
 @if (isOpen && isEditOpen && event?.creator?.id === user?.id) {
-	<app-edit-event [event]="event" (onSubmit)="updateEvent($event)"></app-edit-event>
+	<app-edit-event [event]="event" (onSubmit)="updateEvent($event)"/>
 }

@@ -13,7 +13,7 @@
 	</div>
 	<div class="day-events pb-1">
 		@for (event of day?.events; track event.id && event.title) {
-			<app-day-event [event]="event" [day]="day"></app-day-event>
+			<app-day-event [event]="event" [day]="day"/>
 		}
 	</div>
 </div>

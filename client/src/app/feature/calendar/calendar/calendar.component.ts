@@ -1,17 +1,15 @@
 import {Component, EventEmitter, Input, OnDestroy, Output} from '@angular/core';
-import {DayComponent} from "../../../shared/day/day.component";
 import {PartialDay} from "../../../interfaces/Day";
 import {WeeksComponent} from "../../../shared/weeks/weeks.component";
-import {DatePipe} from "@angular/common";
+import {DayComponent} from "../../../shared/day/day.component";
 import {CalendarToolbarComponent} from "../../../shared/calendar-toolbar/calendar-toolbar.component";
 
 @Component({
 	selector: 'app-calendar',
 	standalone: true,
 	imports: [
-		DayComponent,
 		WeeksComponent,
-		DatePipe,
+		DayComponent,
 		CalendarToolbarComponent
 	],
 	templateUrl: './calendar.component.html',

@@ -1,4 +1,5 @@
 import {IsArray, IsEmail, IsISO8601, IsNumber, IsString} from "class-validator";
+import {IsBeforeEndDate} from "../decorators/IsBeforeEndDate";
 
 export class CreateEventDto {
     @IsString()
@@ -8,6 +9,7 @@ export class CreateEventDto {
     description!: string;
 
     @IsISO8601()
+    @IsBeforeEndDate('endDate', { message: 'Start date must be before end date' })
     startDate!: string | Date;
 
     @IsISO8601()
